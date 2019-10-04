@@ -19,8 +19,8 @@ f4b45c333fe61d31d48e42b087e6ae3b  printoutstatements.bash
 5f5c60cbd6adb86de4cfab7f4f5d4e70  pullTermuxArchSubmodules.sh
 f1515b0970e9947fa60051f388cf5ac5  robots.txt
 505dedc161b99cbcbbd8c46ce045859f  setupTermuxArch.bash
-505dedc161b99cbcbbd8c46ce045859f  setupTermuxArch.sh
-a1598db1cdac6487a4f28c4d8f86a65d  setupTermuxArch.sha512
-7f8570fe9b5b500fbe1b293069b365b1  setupTermuxArch.tar.gz
+46fd592e323d27f0931bf2a8f085aad9  setupTermuxArch.sh
+47f0a183ae4db6f796152214f1560be3  setupTermuxArch.sha512
+953fce4cce6f723118b65b85a2910912  setupTermuxArch.tar.gz
 7bc1168b08feec2807dae6298a12922e  sitemap.txt
 3cad51e91f6930027c68ba07d240deb9  tgen.bash

@@ -810,4 +810,4 @@ else
 fi
 
 # _STANDARD_="function name" && STANDARD="variable name" are under construction.
-# setupTermuxArch.bash EOF
+# setupTermuxArch.sh EOF
