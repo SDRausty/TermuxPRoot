@@ -13,7 +13,7 @@ ecff5b4b401d5e4c76bb53389200433b  index.md
 98cce778a8b9a8d3b42aaef42675e51b  init.sh
 9aa532c61e54d489d077b4a60817f713  knownconfigurations.bash
 8657e44666177af29af9f779ad141607  maintenanceroutines.bash
-75cb6ef9a40ef3c62ae2f31b16509c8e  make.sums.sh
+8b7ff2d0931de0880ac546ba697fefe0  make.sums.sh
 542f5b3747d3142fa8cb8a6d6870c20e  necessaryfunctions.bash
 f4b45c333fe61d31d48e42b087e6ae3b  printoutstatements.bash
 5f5c60cbd6adb86de4cfab7f4f5d4e70  pullTermuxArchSubmodules.sh
