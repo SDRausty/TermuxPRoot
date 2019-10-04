@@ -13,7 +13,7 @@ e965e90461bbfb0bd36375a9497c0eee9e077cff  gsa.bash
 e96afd14713c2cd6ed95c33990773a3f35eb0d19  init.sh
 246209d767f9df845682a0e4a5605319fda44c95  knownconfigurations.bash
 950b90fc316280803a549d19a67bfff724782fbf  maintenanceroutines.bash
-e723584dbd54f48ca1ebaf5e9f5c63c5b2afbeab  make.sums.sh
+1772ea3b8518cbe46d01a37ac9f512eb1e0686d8  make.sums.sh
 92672f28dab6c67becc890700fec9bc49ec85e9d  necessaryfunctions.bash
 16224d703772d133be752dd8a463a2ef60238ec2  printoutstatements.bash
 6e2b2af43eea00dfb2afbccd8ec0faa51bde852f  pullTermuxArchSubmodules.sh
