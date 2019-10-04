@@ -3,13 +3,12 @@
 # Hosted termuxarch.github.io/TermuxArch courtesy https://pages.github.com
 # https://termuxarch.github.io/TermuxArch/README has info about this project. 
 # https://termuxarch.github.io/TermuxArch/CONTRIBUTORS Thank you for your help.  
-# _STANDARD_="function name" && STANDARD="variable name" are under construction.
 ################################################################################
 IFS=$'\n\t'
 set -Eeuo pipefail
 shopt -s nullglob globstar
 unset LD_PRELOAD
-VERSIONID="v2.0.id0406"
+VERSIONID="v2.0.id0407"
 ## INIT FUNCTIONS ##############################################################
 _ARG2DIR_() {  # Argument as ROOTDIR.
 	ARG2="${@:2:1}"
@@ -810,4 +809,5 @@ else
 	_PRINTUSAGE_
 fi
 
+# _STANDARD_="function name" && STANDARD="variable name" are under construction.
 # setupTermuxArch.bash EOF
