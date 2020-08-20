@@ -17,11 +17,13 @@ else
 	sed -i "s/required/sufficient/g" /etc/pam.d/su
 	sed -i "s/^#auth/auth/g" /etc/pam.d/su
 	useradd -s /bin/bash "\$1" -U
-		usermod "\$1" -aG wheel
-		[[ -d /etc/sudoers.d ]] && printf "%s\\n" "\$1 ALL=(ALL) ALL" >> /etc/sudoers.d/"\$1"
+	usermod "\$1" -aG wheel
+	passwd -d "\$1"
+	chage -I -1 -m 0 -M -1 -E -1 "\$1"
+	[[ -d /etc/sudoers.d ]] && printf "%s\\n" "\$1 ALL=(ALL) ALL" >> /etc/sudoers.d/"\$1"
 	sed -i "s/\$1:x/\$1:/g" /etc/passwd
 	cp -r /root /home/"\$1"
-	printf "%s\\n" "Added user \$1 and directory /home/\$1 created.  To use this account run '$STARTBIN login \$1' in Termux.  Remember please to not nest proot in proot by running '$STARTBIN' in '$STARTBIN' as this may cause issues."
+	printf "%s\\n" "Added user \$1 and directory /home/\$1 created.  To use this account run '$STARTBIN login \$1' in Termux.  Remember please not to nest proot in proot by running '$STARTBIN' in '$STARTBIN' as this may cause issues."
 fi
 }
 _PMFSESTRING_() { 
@@ -68,8 +70,9 @@ _ADDbash_logout_() {
 }
 
 _ADDbash_profile_() {
-	[ -e root/.bash_profile ] && _DOTHF_ root/.bash_profile
-	cat > root/.bash_profile <<- EOM
+	[ -e root/.bash_profile ] && _DOTHF_ "root/.bash_profile"
+	printf "%s\\n" "PATH=\"\$HOME/bin:/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:\$PATH\"" > root/.bash_profile
+	cat >> root/.bash_profile <<- EOM
 	. "\$HOME"/.bashrc
 	if [ ! -e "\$HOME"/.hushlogin ] && [ ! -e "\$HOME"/.chushlogin ] ; then
 		. /etc/motd
@@ -89,9 +92,8 @@ _ADDbash_profile_() {
 }
 
 _ADDbashrc_() {
-	[ -e root/.bashrc ] && _DOTHF_ root/.bashrc
-	[[ -d "$HOME"/bin ]] && printf "%s\\n" "PATH=\"\$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:\"" > root/.bashrc || printf "%s\\n" "PATH=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PREFIX/bin:$PREFIX/bin/applets:$PREFIX/lib:$PREFIX/libexec\"" >> root/.bashrc
-	cat >> root/.bashrc <<- EOM
+	[ -e root/.bashrc ] && _DOTHF_ "root/.bashrc"
+	cat > root/.bashrc <<- EOM
 	[ -f /etc/profile.d/perlbin.sh ] && . /etc/profile.d/perlbin.sh
 	alias C='cd .. && pwd'
 	alias c='cd .. && pwd'
@@ -660,8 +662,8 @@ _ADDpci_() {
 }
 
 _ADDprofile_() {
-	[ -e root/.profile ] && _DOTHF_ root/.profile
-	[ -e "$HOME"/.profile ] && ( grep "proxy" "$HOME"/.profile | grep "export" >>  root/.profile 2>/dev/null )
+	[ -e root/.profile ] && _DOTHF_ "root/.profile"
+	[ -e "$HOME"/.profile ] && (grep "proxy" "$HOME"/.profile | grep "export" >>  root/.profile 2>/dev/null) ||:
 	touch root/.profile
 }
 
@@ -705,7 +707,7 @@ _ADDtour_() {
 	cat >> root/bin/tour <<- EOM
 	printf "\n\e[1;32m==> \e[1;37mRunning \e[1;32mls -R --color=always \$HOME \e[1;37m\n\n"
 	sleep 1
-	ls -R --color=always "\$HOME"
+	ls -alr --color=always "\$HOME"
 	sleep 4
 	printf "\n\e[1;32m==> \e[1;37mRunning \e[1;32mcat \$HOME/.bash_profile\e[1;37m\n\n"
 	sleep 1
@@ -761,13 +763,14 @@ _ADDtrim_() {
 _ADDv_() {
 	_CFLHDR_ root/bin/v
 	cat >> root/bin/v  <<- EOM
-	if [[ -z "\${1:-}" ]] ; then
+	if [[ -z "\${1:-}" ]]
+	then
 		ARGS=(".")
 	else
 		ARGS=("\$@")
 	fi
 	EOM
-	printf "%s\\n# v EOF#" "[ ! -x \"\$(command -v vim)\" ] && ( [ \"\$UID\" = \"0\" ] && pacman --noconfirm --color=always -S vim || sudo pacman --noconfirm --color=always -S vim ) || vim  \"\${ARGS[@]}\"" >> root/bin/v
+	printf "%s\\n# v EOF#" "[ ! -x \"\$(command -v vim)\" ] && ( [ \"\$UID\" = \"0\" ] && pacman --noconfirm --color=always -S vim || sudo pacman --noconfirm --color=always -S vim ) && vim  \"\${ARGS[@]}\" || vim  \"\${ARGS[@]}\"" >> root/bin/v
 	chmod 700 root/bin/v
 }
 
@@ -925,7 +928,7 @@ _ADDyt_() {
 _PREPPACMANCONF_() {
 	if [ -f "$INSTALLDIR"/etc/pacman.conf ] # file is found
 	then # rewrite it for the PRoot environment
-		sed -i 's/^CheckSpace/\#CheckSpace/g' "$INSTALLDIR/etc/pacman.conf" && sed -i 's/^#Color/Color/g' "$INSTALLDIR/etc/pacman.conf" && sed -i 's/#IgnorePkg   =/IgnorePkg   = systemctl systemd-libs systemd-sysvcompat/g' "$INSTALLDIR/etc/pacman.conf" && sed -i 's/#IgnoreGroup =/IgnoreGroup = systemctl systemd-libs systemd-sysvcompat/g' "$INSTALLDIR/etc/pacman.conf" && sed -i 's/#NoUpgrade   =/NoUpgrade  = systemctl systemd-libs systemd-sysvcompat/g' "$INSTALLDIR/etc/pacman.conf"
+		sed -i 's/^CheckSpace/\#CheckSpace/g' "$INSTALLDIR/etc/pacman.conf" && sed -i 's/^#Color/Color/g' "$INSTALLDIR/etc/pacman.conf" && sed -i 's/#IgnorePkg   =/IgnorePkg   = systemctl systemd systemd-libs systemd-sysvcompat/g' "$INSTALLDIR/etc/pacman.conf" && sed -i 's/#IgnoreGroup =/IgnoreGroup = systemctl systemd systemd-libs systemd-sysvcompat/g' "$INSTALLDIR/etc/pacman.conf" && sed -i 's/#NoUpgrade   =/NoUpgrade  = systemctl systemd systemd-libs systemd-sysvcompat/g' "$INSTALLDIR/etc/pacman.conf"
 	else
 		printf "%s%s" "Cannot find file $INSTALLDIR/etc/pacman.conf : " "Signal generated in _PREPPACMANCONF_ archlinuxconfig.bash ${0##*/} : Continuing... "
 	fi

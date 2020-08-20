@@ -57,9 +57,9 @@ _CALLSYSTEM_() {
 	else
 		if [[ "$CMIRROR" = "os.archlinuxarm.org" ]] || [[ "$CMIRROR" = "mirror.archlinuxarm.org" ]]
 		then
-			until _FTCHSTND_ || FRV="$?" && ([[ $FRV = 3 ]] || [[ $FRV = 22 ]] && printf "\\e[1;31m%s\\e[1;37m%s\\e[0m\\n" "Signal $FRV generated in 'until _FTCHSTND_ necessaryfunctions.bash ${0##/*}' :" "  Continuing...") && break
+			until _FTCHSTND_ || FRV="$?" && [[ -z "${FRV:-}" ]] && break || ([[ $FRV = 3 ]] || [[ $FRV = 22 ]]) && _PSGI1ESTRING_ "FRV=$FRV until _FTCHSTND_ necessaryfunctions.bash ${0##/*} : Continuing..." && break
 			do
-				_FTCHSTND_ || CRV="$?" && _PSGI1ESTRING_ "CRV=$CRV _FTCHSTND_ ${0##*/}"
+				_FTCHSTND_
 				sleep 2
 				printf "\\n"
 				COUNTER=$((COUNTER + 1))
@@ -361,16 +361,16 @@ _MD5CHECK_() {
 }
 
 _PREPROOTDIR_() {
-	cd "$INSTALLDIR"
-	[ ! -e etc ] &&	mkdir -p etc
-	[ ! -e home ] && mkdir -p home
-	[ ! -e root/bin ] && mkdir -p root/bin
-	[ ! -e usr/bin ] && mkdir -p usr/bin
-	[ ! -e var/binds ] && mkdir -p var/binds
+	[[ ! -d etc ]] && mkdir -p etc
+	[[ ! -d home ]] && mkdir -p home
+	[[ ! -d root/bin ]] && mkdir -p root/bin
+	[[ ! -d usr/bin ]] && mkdir -p usr/bin
+	[[ ! -d var/binds ]] && mkdir -p var/binds
 }
 
 _PREPINSTALLDIR_() {
-	_PREPROOTDIR_
+	cd "$INSTALLDIR"
+	_PREPROOTDIR_ || _PSGI1ESTRING_ "_PREPROOTDIR_ _PREPINSTALLDIR_ necessaryfunctions.bash ${0##*/}"
 	_SETLANGUAGE_
 	_ADDADDS_
 	_DOPROXY_
@@ -390,7 +390,7 @@ _PREPROOT_() {
 
 _RUNFINISHSETUP_() {
 	_SEDUNCOM_() {
-			sed -i "/\/mirror.archlinuxarm.org/ s/^# *//" "$INSTALLDIR"/etc/pacman.d/mirrorlist || _PSGI1ESTRING_ "sed -i _SEDUNCOM_ ${0##*/}" # sed replace a character in a matched line in place
+			sed -i "/\/mirror.archlinuxarm.org/ s/^# *//" "$INSTALLDIR"/etc/pacman.d/mirrorlist || _PSGI1ESTRING_ "sed -i _SEDUNCOM_ necessaryfunctions.bash ${0##*/}" # sed replace a character in a matched line in place
 	}
 	printf "\\e[0m"
 	if [[ "$FSTND" ]]
@@ -401,7 +401,7 @@ _RUNFINISHSETUP_() {
 		if grep "$NMIR" "$INSTALLDIR"/etc/pacman.d/mirrorlist
 		then
 			printf "%s\\n" "Found server $NMIR in /etc/pacman.d/mirrorlist; Uncommenting $NMIR."
-			sed -i "/$NMIR/ s/^# *//" "$INSTALLDIR"/etc/pacman.d/mirrorlist  || _SEDUNCOM_ || _PSGI1ESTRING_ "sed -i _RUNFINISHSETUP_ ${0##*/}"
+			sed -i "/$NMIR/ s/^# *//" "$INSTALLDIR"/etc/pacman.d/mirrorlist  || _SEDUNCOM_ || _PSGI1ESTRING_ "sed -i _RUNFINISHSETUP_ necessaryfunctions.bash ${0##*/}"
 		else
 			printf "%s\\n" "Did not find server $NMIR in /etc/pacman.d/mirrorlist; Adding $NMIR to file /etc/pacman.d/mirrorlist."
 			printf "%s\\n" "Server = $NLCMIRROR/\$arch/\$repo" >> "$INSTALLDIR"/etc/pacman.d/mirrorlist
@@ -487,13 +487,13 @@ _TOUCHUPSYS_() {
 
 _WAKELOCK_() {
 	_PRINTWLA_
-	am startservice --user 0 -a com.termux.service_wake_lock com.termux/com.termux.app.TermuxService > /dev/null
+	am startservice --user 0 -a com.termux.service_wake_lock com.termux/com.termux.app.TermuxService > /dev/null || _PSGI1ESTRING_ "am startservice _WAKELOCK_ necessaryfunctions.bash ${0##/*} : Continuing..."
 	_PRINTDONE_
 }
 
 _WAKEUNLOCK_() {
 	_PRINTWLD_
-	am startservice --user 0 -a com.termux.service_wake_unlock com.termux/com.termux.app.TermuxService > /dev/null
+	am startservice --user 0 -a com.termux.service_wake_unlock com.termux/com.termux.app.TermuxService > /dev/null || _PSGI1ESTRING_ "am startservice _WAKEUNLOCK_ necessaryfunctions.bash ${0##/*} : Continuing..."
 	_PRINTDONE_
 }
 # necessaryfunctions.bash EOF
