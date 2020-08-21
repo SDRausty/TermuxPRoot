@@ -75,7 +75,7 @@ _ADDbash_profile_() {
 	cat >> root/.bash_profile <<- EOM
 	. "\$HOME"/.bashrc
 	if [ ! -e "\$HOME"/.hushlogin ] && [ ! -e "\$HOME"/.chushlogin ] ; then
-		. /etc/motd
+		[ -e /etc/mota ] && . /etc/mota
 	fi
 	if [ -e "\$HOME"/.chushlogin ] ; then
 		rm "\$HOME"/.chushlogin
@@ -338,6 +338,10 @@ _ADDfbindprocstat8_() {
 	EOM
 }
 
+_ADDfbindprocuptime_() {
+	printf "%s\\n" "350735.47 234388.90" > var/binds/fbindprocuptime
+}
+
 _ADDfbindprocversion_() {
 	_CFLHDRS_ var/binds/fbindprocversion.prs
 	cat > var/binds/fbindprocversion.prs  <<- EOM
@@ -516,15 +520,45 @@ _ADDkeys_() {
 	chmod 700 root/bin/keys
 }
 
+_ADDMOTA_() {
+	if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX86_64" ]]
+	then
+		cat > etc/mota  <<- EOM
+		printf "\\n\\e[1;34m%s\\n%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\n\\e[1;34m%s\\e[0m%s\\n\\e[1;34m%s\\e[0;34m%s\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0m%s\\n\\n" "Welcome to Arch Linux in Termux!" "Install a package: " "pacman -S package" "More  information: " "pacman -[D|F|Q|R|S|T|U]h" "Search   packages: " "pacman -Ss query" "Upgrade  packages: " "pacman -Syu" "Chat:  " "https://wiki.termux.com/wiki/Community" "Help: " "info query " "and " "man query" "IRC: " "wiki.archlinux.org/index.php/IRC_channel"
+		EOM
+	else
+		cat > etc/mota  <<- EOM
+		printf "\\n\\e[1;34m%s\\n%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\n\\e[1;34m%s\\e[0m%s\\n\\e[1;34m%s\\e[0m%s\\n\\e[1;34m%s\\e[0;34m%s\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0m%s\\n\\n" "Welcome to Arch Linux in Termux!" "Install a package: " "pacman -S package" "More  information: " "pacman -[D|F|Q|R|S|T|U]h" "Search   packages: " "pacman -Ss query" "Upgrade  packages: " "pacman -Syu" "Chat:  " "https://wiki.termux.com/wiki/Community" "Forum: " "https://archlinuxarm.org/forum" "Help: " "info query " "and " "man query" "IRC: " "wiki.archlinux.org/index.php/IRC_channel"
+		EOM
+	fi
+}
+
 _ADDMOTD_() {
 	if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX86_64" ]]
 	then
 		cat > etc/motd  <<- EOM
-		printf "\\n\\e[1;34m%s\\n%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\n\\e[1;34m%s\\e[0m%s\\n\\e[1;34m%s\\e[0;34m%s\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0m%s\\n\\n" "Welcome to Arch Linux in Termux!" "Install a package: " "pacman -S package" "More  information: " "pacman -[D|F|Q|R|S|T|U]h" "Search   packages: " "pacman -Ss query" "Upgrade  packages: " "pacman -Syu" "Chat:  " "https://wiki.termux.com/wiki/Community" "Help: " "info query " "and " "man query" "IRC: " "wiki.archlinux.org/index.php/IRC_channel"
+		Welcome to Arch Linux in Termux!
+		Install a package: pacman -S package
+		More  information: pacman -[D|F|Q|R|S|T|U]h
+		Search   packages: pacman -Ss query
+		Upgrade  packages: pacman -Syu
+		
+		Chat:  https://wiki.termux.com/wiki/Community
+		Help: info query and man query
+		IRC: wiki.archlinux.org/index.php/IRC_channel	
 		EOM
 	else
 		cat > etc/motd  <<- EOM
-		printf "\\n\\e[1;34m%s\\n%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\n\\e[1;34m%s\\e[0m%s\\n\\e[1;34m%s\\e[0m%s\\n\\e[1;34m%s\\e[0;34m%s\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0m%s\\n\\n" "Welcome to Arch Linux in Termux!" "Install a package: " "pacman -S package" "More  information: " "pacman -[D|F|Q|R|S|T|U]h" "Search   packages: " "pacman -Ss query" "Upgrade  packages: " "pacman -Syu" "Chat:  " "https://wiki.termux.com/wiki/Community" "Forum: " "https://archlinuxarm.org/forum" "Help: " "info query " "and " "man query" "IRC: " "wiki.archlinux.org/index.php/IRC_channel"
+		Welcome to Arch Linux in Termux!
+		Install a package: pacman -S package
+		More  information: pacman -[D|F|Q|R|S|T|U]h
+		Search   packages: pacman -Ss query
+		Upgrade  packages: pacman -Syu
+		
+		Chat:  https://wiki.termux.com/wiki/Community
+		Forum: https://archlinuxarm.org/forum
+		Help: info query and man query
+		IRC: wiki.archlinux.org/index.php/IRC_channel	
 		EOM
 	fi
 }
@@ -705,7 +739,7 @@ _ADDthstartarch_() {
 _ADDtour_() {
 	_CFLHDR_ root/bin/tour "# A short tour that shows a few of the new files in ths system."
 	cat >> root/bin/tour <<- EOM
-	printf "\n\e[1;32m==> \e[1;37mRunning \e[1;32mls -R --color=always \$HOME \e[1;37m\n\n"
+	printf "\n\e[1;32m==> \e[1;37mRunning \e[1;32mls -alr --color=always \$HOME \e[1;37m\n\n"
 	sleep 1
 	ls -alr --color=always "\$HOME"
 	sleep 4
