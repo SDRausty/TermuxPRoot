@@ -39,7 +39,14 @@ _ADDAUSER_() {
 _ADDREADME_() {
 	_CFLHDR_ root/bin/README.md
 	cat > root/bin/README.md <<- EOM
-	This directory contains shortcut commands that automate and ease using the command line.
+	The HOME/bin directory may contain shortcut commands that automate and ease using the command line.  Some of these commands are listed here:
+
+	* The command 'keys' installs Arch Linux keys,
+	* The command 'makefakeroottcp' creates the 'fakeroot-tcp' command,
+	* The command 'makeyay' creates the 'fakeroot-tcp' and 'yay' commands, and also patches the 'makepkg' command,
+	* The command 'patchmakepkg' patches the 'makepkg' command.
+
+	This file can be expanded so the beginning user can get to know the Linux experience easier.  Would you like to create an issue along with a pull request to add information to this file so that the beginning user can get to know the Arch Linux in Termux PRoot experience easier?  If you do want to expand this file to enhance this experience, visit these links:
 
 	* Comments welcome at https://github.com/TermuxArch/TermuxArch/issues ✍
 	* Pull requests welcome at https://github.com/TermuxArch/TermuxArch/pulls ✍
@@ -66,7 +73,8 @@ _ADDaddresolvconf_() {
 
 _ADDbash_logout_() {
 	cat > root/.bash_logout <<- EOM
-	if [ ! -e "\$HOME"/.hushlogout ] && [ ! -e "\$HOME"/.chushlogout ] ; then
+	if [ ! -e "\$HOME"/.hushlogout ] && [ ! -e "\$HOME"/.chushlogout ]
+	then
 		. /etc/moto
 	fi
 	# .bash_logout EOF
@@ -78,10 +86,12 @@ _ADDbash_profile_() {
 	printf "%s\\n" "PATH=\"\$HOME/bin:\$PATH:/usr/sbin:/sbin:/bin\"" > root/.bash_profile
 	cat >> root/.bash_profile <<- EOM
 	. "\$HOME"/.bashrc
-	if [ ! -e "\$HOME"/.hushlogin ] && [ ! -e "\$HOME"/.chushlogin ] ; then
+	if [ ! -e "\$HOME"/.hushlogin ] && [ ! -e "\$HOME"/.chushlogin ]
+	then
 		[ -e /etc/mota ] && . /etc/mota
 	fi
-	if [ -e "\$HOME"/.chushlogin ] ; then
+	if [ -e "\$HOME"/.chushlogin ]
+	then
 		rm "\$HOME"/.chushlogin
 	fi
 	PS1="[\[\e[38;5;148m\]\u\[\e[1;0m\]\A\[\e[1;38;5;112m\]\W\[\e[0m\]]$ "
@@ -136,7 +146,8 @@ _ADDbashrc_() {
 	alias q='exit'
 	# .bashrc EOF
 	EOM
-	if [ -e "$HOME"/.bashrc ] ; then
+	if [ -e "$HOME"/.bashrc ]
+	then
 		grep proxy "$HOME"/.bashrc | grep "export" >>  root/.bashrc 2>/dev/null ||:
 	fi
 }
@@ -189,7 +200,8 @@ _ADDch_() {
 
 	## ch begin ####################################################################
 
-	if [[ -z "\${1:-}" ]] ; then
+	if [[ -z "\${1:-}" ]]
+	then
 		ARGS=""
 	else
 		ARGS="\$@"
@@ -197,10 +209,12 @@ _ADDch_() {
 
 	printf "\\\\n\\\\e[1;32m==> \\\\e[1;37m%s \\\\e[1;32m%s %s %s\\\e[0m%s...\\\\n\\\\n" "Running" "TermuxArch \$(basename "\$0")" "\$ARGS" "\$VERSIONID"
 
-	if [[ -f "\$HOME"/.hushlogin ]] && [[ -f "\$HOME"/.hushlogout ]] ; then
+	if [[ -f "\$HOME"/.hushlogin ]] && [[ -f "\$HOME"/.hushlogout ]]
+	then
 		rm "\$HOME"/.hushlogin "\$HOME"/.hushlogout
 		echo "Hushed login and logout: OFF"
-	elif [[ -f "\$HOME"/.hushlogin ]] || [[ -f "\$HOME"/.hushlogout ]] ; then
+	elif [[ -f "\$HOME"/.hushlogin ]] || [[ -f "\$HOME"/.hushlogout ]]
+	then
 		touch "\$HOME"/.hushlogin "\$HOME"/.hushlogout
 		echo "Hushed login and logout: ON"
 	else
@@ -279,7 +293,8 @@ _ADDfbindprocshmem_() {
 _ADDfbindprocstat_() { # Chooses the appropriate four or eight processor stat file.
 	NESSOR="$(grep cessor /proc/cpuinfo)"
 	NCESSOR="${NESSOR: -1}"
-	if [[ "$NCESSOR" -le "3" ]] 2>/dev/null ; then
+	if [[ "$NCESSOR" -le "3" ]] 2>/dev/null
+	then
 		_ADDfbindprocstat4_
 	else
 		_ADDfbindprocstat8_
@@ -371,7 +386,8 @@ _ADDfbindexample_() {
 }
 
 _ADDfbinds_() { # Checks if /proc/stat is usable.
-	if [[ ! -r /proc/stat ]] ; then
+	if [[ ! -r /proc/stat ]]
+	then
 		_ADDfbindprocstat_
 		_ADDfbindprocversion_
 	fi
@@ -501,14 +517,17 @@ _ADDkeys_() {
 	trap _TRPET_ EXIT
 	## keys begin ##################################################################
 
-	if [[ -z "\${1:-}" ]] ; then
+	if [[ -z "\${1:-}" ]]
+	then
 		KEYRINGS[0]="archlinux-keyring"
 		KEYRINGS[1]="archlinuxarm-keyring"
 		KEYRINGS[2]="ca-certificates-utils"
-	elif [[ "\$1" = x86 ]]; then
+	elif [[ "\$1" = x86 ]]
+	then
 		KEYRINGS[0]="archlinux32-keyring-transition"
 		KEYRINGS[1]="ca-certificates-utils"
-	elif [[ "\$1" = x86_64 ]]; then
+	elif [[ "\$1" = x86_64 ]]
+	then
 		KEYRINGS[0]="archlinux-keyring"
 		KEYRINGS[1]="ca-certificates-utils"
 	else
@@ -582,31 +601,30 @@ _ADDMOTO_() {
 	EOM
 }
 
-_ADDmakefakeroot-tcp_() {
-	_CFLHDR_ root/bin/makefakeroottcp "# attempt to build and install fakeroot-tcp"
+_ADDmakefakeroottcp_() {
+	_CFLHDR_ root/bin/makefakeroottcp "# build and install fakeroot-tcp"
 	cat >> root/bin/makefakeroottcp <<- EOM
 	if [ "\$UID" = "0" ]
 	then
-		printf "\\n%s\\n\\n" "Error: Should not be used as root."
+		printf "\\\\n\\\\e[1;37m%s\\\\e[0m\\\\n\\\\n" "ERROR:  Script '\${0##*/}' should not be used as root:  The TermuxArch command 'addauser' creates user accounts in Arch Linux in PRoot and configures these user accounts for 'sudo':  The 'addauser' command is intended to be run by the Arch Linux in PRoot root user:  To use 'addauser' directly from Termux, run '$STARTBIN command addauser user' in Termux to create this account in Arch Linux PRoot:  The command '$STARTBIN help' has more information about using '$STARTBIN':  EXITING..."
 	else
 		[ ! -f /var/lock/patchmakepkg.lock ] && patchmakepkg
-		printf "%s\\n" "Attempting to build and install fakeroot-tcp: "
-		([[ ! "\$(command -v automake)" ]] || [[ ! "\$(command -v fakeroot)" ]] || [[ ! "\$(command -v git)" ]] || [[ ! "\$(command -v po4a)" ]]) && sudo pacman --noconfirm --color=always -S automake base-devel fakeroot git po4a libtool
-		cd 
-		(git clone https://aur.archlinux.org/fakeroot-tcp.git && cd fakeroot-tcp && sed -i 's/  patch/  sudo patch/g' PKGBUILD && makepkg -is) || printf "%s\n" "Continuing to build and install fakeroot-tcp: " && cd fakeroot-tcp && sed -i 's/  patch/  sudo patch/g' PKGBUILD && makepkg -is
-		printf "%s\\n" "Attempting to build and install fakeroot-tcp: DONE"
+		printf "%s\\n" "Building and installing fakeroot-tcp: "
+		([[ ! "\$(command -v automake)" ]] || [[ ! "\$(command -v fakeroot)" ]] || [[ ! "\$(command -v git)" ]] || [[ ! "\$(command -v po4a)" ]]) 2>/dev/null && sudo pacman --noconfirm --color=always -S automake base-devel fakeroot git po4a libtool
+		cd && (git clone https://aur.archlinux.org/fakeroot-tcp.git && cd fakeroot-tcp && sed -i 's/  patch/  sudo patch/g' PKGBUILD && makepkg -is) || printf "%s\n" "Continuing to build and install fakeroot-tcp: " && cd fakeroot-tcp && sed -i 's/  patch/  sudo patch/g' PKGBUILD && makepkg -is
+		printf "%s\\n" "Building and installing fakeroot-tcp: DONE"
 	fi
-	# makefakeroot-tcp EOF
+	# makefakeroottcp EOF
 	EOM
 	chmod 700 root/bin/makefakeroottcp
 }
 
 _ADDmakeyay_() {
-	_CFLHDR_ root/bin/makeyay "# attempt to build and install yay"
+	_CFLHDR_ root/bin/makeyay "# build and install yay"
 	cat >> root/bin/makeyay <<- EOM
 	if [ "\$UID" = "0" ]
 	then
-		printf "\\\\n\\\\e[1;37m%s\\\\e[0m\\\\n\\\\n" "ERROR:  Script '\${0##*/}' should not be used as root:  The TermuxArch command 'addauser' creates user accounts in Arch Linux in PRoot and configures these user accounts for 'sudo':  The 'addauser' command is intended to be run by the Arch Linux in PRoot root user:  To use 'addauser' directly from Termux, run '$STARTBIN command addauser user' in Termux to create this account in Arch Linux PRoot:  The command '$STARTBIN help' has more information how to use '$STARTBIN':  EXITING..."
+		printf "\\\\n\\\\e[1;37m%s\\\\e[0m\\\\n\\\\n" "ERROR:  Script '\${0##*/}' should not be used as root:  The TermuxArch command 'addauser' creates user accounts in Arch Linux in PRoot and configures these user accounts for 'sudo':  The 'addauser' command is intended to be run by the Arch Linux in PRoot root user:  To use 'addauser' directly from Termux, run '$STARTBIN command addauser user' in Termux to create this account in Arch Linux PRoot:  The command '$STARTBIN help' has more information about using '$STARTBIN':  EXITING..."
 	else
 		_PRMAKE_() {
 			printf "\\\\e[1;32m==> \\\\e[1;37m%s\\\\n" "Running makepkg -irs --noconfirm..."
@@ -614,7 +632,7 @@ _ADDmakeyay_() {
 		printf "\\\\e[1;37m%s\\\\e[0m\\\\n" "Building and installing  yay:"
 		cd 
 		[ ! -f /var/lock/patchmakepkg.lock ] && patchmakepkg
-		! fakeroot ls >/dev/null && makefakeroot-tcp
+		! fakeroot ls >/dev/null && makefakeroottcp
 		(git clone https://aur.archlinux.org/yay.git && cd yay && _PRMAKE_ && makepkg -irs --noconfirm) || printf "\\\\e[1;37m%s\\\\e[0m\\\\n" "Continuing to build and install yay..." && cd yay && _PRMAKE_ && makepkg -irs --noconfirm
 		printf "\\\\e[1;37m%s\\\\e[0m\\\\n" "Building and installing yay: DONE"
 	fi
@@ -624,7 +642,7 @@ _ADDmakeyay_() {
 }
 
 _ADDpatchmakepkg_() {
-	_CFLHDR_ root/bin/patchmakepkg "# attempt to build and install yay"
+	_CFLHDR_ root/bin/patchmakepkg "# patch makepkg"
 	cat >> root/bin/patchmakepkg <<- EOM
 	printf "%s\\n" "Attempting to patch makepkg: "
 	[ -f /var/lock/patchmakepkg.lock ] && printf "%s\\n" "Already patched makepkg: DONE" && exit
@@ -663,13 +681,17 @@ _ADDpc_() {
 
 	printf '\033]2;  🔑 TermuxArch '"\$(basename "\$0") \$ARGS"' 📲 \007'
 	printf "\\\\n\\\\e[1;32m==> \\\\e[1;37m%s \\\\e[0;32m%s \\\\e[1;32m%s %s \\\e[0m%s...\\\\n\\\\n" "Running" "TermuxArch" "\$(basename "\$0")" "\$ARGS" "\$VERSIONID"
-	if [[ -z "\${1:-}" ]] ; then
+	if [[ -z "\${1:-}" ]]
+	then
 	pacman --noconfirm --color=always -S
-	elif [[ "\$1" = "a" ]] ; then
+	elif [[ "\$1" = "a" ]]
+	then
 	pacman --noconfirm --color=always -S base base-devel "\${@:2}"
-	elif [[ "\$1" = "ae" ]] ; then
+	elif [[ "\$1" = "ae" ]]
+	then
 	pacman --noconfirm --color=always -S base base-devel emacs "\${@:2}"
-	elif [[ "\$1" = "a8" ]] ; then
+	elif [[ "\$1" = "a8" ]]
+	then
 	pacman --noconfirm --color=always -S base base-devel emacs jdk8-openjdk "\${@:2}"
 	else
 	pacman --noconfirm --color=always -S "\$@"
@@ -699,16 +721,20 @@ _ADDpci_() {
 	## pci begin ###################################################################
 
 	printf "\\\\n\\\\e[1;32m==> \\\\e[1;37m%s \\\\e[1;32m%s %s %s \\\e[0m%s...\\\\n\\\\n" "Running" "TermuxArch \$(basename "\$0")" "\$ARGS" "\$VERSIONID"
-	if [[ -z "\${1:-}" ]] ; then
-	pacman --noconfirm --color=always -Syu
-	elif [[ "\$1" = "e" ]] ; then
-	pacman --noconfirm --color=always -Syu base base-devel emacs "\${@:2}"
-	elif [[ "\$1" = "e8" ]] ; then
-	pacman --noconfirm --color=always -Syu base base-devel emacs jdk8-openjdk "\${@:2}"
-	elif [[ "\$1" = "e10" ]] ; then
-	pacman --noconfirm --color=always -Syu base base-devel emacs jdk10-openjdk "\${@:2}"
+	if [[ -z "\${1:-}" ]]
+	then
+		pacman --noconfirm --color=always -Syu || sudo pacman --noconfirm --color=always -Syu
+	elif [[ "\$1" = "e" ]]
+	then
+		pacman --noconfirm --color=always -Syu base base-devel emacs "\${@:2}" || sudo pacman --noconfirm --color=always -Syu base base-devel emacs "\${@:2}"
+	elif [[ "\$1" = "e8" ]]
+	then
+		pacman --noconfirm --color=always -Syu base base-devel emacs jdk8-openjdk "\${@:2}" || sudo pacman --noconfirm --color=always -Syu base base-devel emacs jdk8-openjdk "\${@:2}"
+	elif [[ "\$1" = "e10" ]]
+	then
+		pacman --noconfirm --color=always -Syu base base-devel emacs jdk10-openjdk "\${@:2}" || sudo pacman --noconfirm --color=always -Syu base base-devel emacs jdk10-openjdk "\${@:2}"
 	else
-	pacman --noconfirm --color=always -Syu "\$@"
+		pacman --noconfirm --color=always -Syu "\$@" || sudo pacman --noconfirm --color=always -Syu "\$@"
 	fi
 	# pci EOF
 	EOM
@@ -840,24 +866,21 @@ _ADDwe_() {
 	multi=16
 	entropy0=\$(cat /proc/sys/kernel/random/entropy_avail 2>/dev/null)
 
-	printintro()
-	{
+	printintro() {
 		printf "\n\e[1;32mTermuxArch Watch Entropy:\n"'\033]2; TermuxArch Watch Entropy 📲  \007'
 	}
 
-	_PRINTTAIL_()
-	{
+	_PRINTTAIL_() {
 		printf "\n\n\e[1;32mTermuxArch Watch Entropy 🏁 \n\n"'\033]2; TermuxArch Watch Entropy 🏁 \007'
 	}
 
-	_PRINTUSAGE_()
-	{
-		printf "\n\e[0;32mUsage:  \e[1;32mwe \e[0;32m Watch Entropy simple.\n\n	\e[1;32mwe sequential\e[0;32m Watch Entropy sequential.\n\n	\e[1;32mwe simple\e[0;32m Watch Entropy simple.\n\n	\e[1;32mwe verbose\e[0;32m Watch Entropy verbose.\n\n"'\033]2; TermuxArch Watch Entropy 📲  \007'
+	_PRINTUSAGE_() {
+		printf "\n\e[0;32mUsage:  \e[1;32mwe \e[0;32m Watch Entropy sequential.\n\n	\e[1;32mwe sequential\e[0;32m Watch Entropy sequential.\n\n	\e[1;32mwe simple\e[0;32m Watch Entropy simple.\n\n	\e[1;32mwe verbose\e[0;32m Watch Entropy verbose.\n\n"'\033]2; TermuxArch Watch Entropy 📲  \007'
 	}
 
-	infif()
-	{
-		if [[ \$entropy0 = "inf" ]] || [[ \$entropy0 = "" ]] || [[ \$entropy0 = "0" ]] ; then
+	infif() {
+		if [[ \$entropy0 = "inf" ]] || [[ \$entropy0 = "" ]] || [[ \$entropy0 = "0" ]]
+		then
 			entropy0=1000
 			printf "\e[1;32m∞^∞infifinfif2minfifinfifinfifinfif∞=1\e[0;32minfifinfifinfifinfif\e[0;32m∞==0infifinfifinfifinfif\e[0;32minfifinfifinfif∞"
 		fi
@@ -865,38 +888,40 @@ _ADDwe_() {
 
 	en0=\$((\${entropy0}*\$multi))
 
-	esleep()
-	{
+	esleep() {
 		int=\$(echo "\$i/\$entropy0" | bc -l)
 		for i in {1..5}; do
-			if (( \$(echo "\$int > 0.1"|bc -l) ));then
+			if (( \$(echo "\$int > 0.1"|bc -l) ))
+			then
 				tmp=\$(echo "\${int}/100" | bc -l)
 				int=\$tmp
 			fi
-			if (( \$(echo "\$int > 0.1"|bc -l) ));then
+			if (( \$(echo "\$int > 0.1"|bc -l) ))
+			then
 				break
 			fi
 		done
 	}
 
-	1sleep()
-	{
+	1sleep() {
 		sleep 0.1
 	}
 
-	bcif()
-	{
+	bcif() {
 		commandif=\$(command -v getprop) ||:
-		if [[ \$commandif = "" ]] ; then
+		if [[ \$commandif = "" ]]
+		then
 			abcif=\$(command -v bc) ||:
-			if [[ \$abcif = "" ]] ; then
+			if [[ \$abcif = "" ]]
+			then
 				printf "\e[1;34mInstalling \e[0;32mbc\e[1;34m...\n\n\e[1;32m"
-				pacman -S bc --noconfirm --color=always
+				pci bc
 				printf "\n\e[1;34mInstalling \e[0;32mbc\e[1;34m: \e[1;32mDONE\n\e[0m"
 			fi
 		else
 			tbcif=\$(command -v bc) ||:
-			if [[ \$tbcif = "" ]] ; then
+			if [[ \$tbcif = "" ]]
+			then
 				printf "\e[1;34mInstalling \e[0;32mbc\e[1;34m...\n\n\e[1;32m"
 				apt install bc --yes
 				printf "\n\e[1;34mInstalling \e[0;32mbc\e[1;34m: \e[1;32mDONE\n\e[0m"
@@ -904,8 +929,7 @@ _ADDwe_() {
 		fi
 	}
 
-	entropysequential()
-	{
+	entropysequential() {
 	printf "\n\e[1;32mWatch Entropy Sequential:\n\n"'\033]2; Watch Entropy Sequential 📲  \007'
 	for i in \$(seq 1 \$en0); do
 		entropy0=\$(cat /proc/sys/kernel/random/entropy_avail 2>/dev/null)
@@ -915,8 +939,7 @@ _ADDwe_() {
 	done
 	}
 
-	entropysimple()
-	{
+	entropysimple() {
 	printf "\n\e[1;32mWatch Entropy Simple:\n\n"'\e]2; Watch Entropy Simple 📲  \007'
 	for i in \$(seq 1 \$en0); do
 		entropy0=\$(cat /proc/sys/kernel/random/entropy_avail 2>/dev/null)
@@ -926,8 +949,7 @@ _ADDwe_() {
 	done
 	}
 
-	entropyverbose()
-	{
+	entropyverbose() {
 	printf "\n\e[1;32mWatch Entropy Verbose:\n\n"'\033]2; Watch Entropy Verbose 📲  \007'
 	for i in \$(seq 1 \$en0); do
 		entropy0=\$(cat /proc/sys/kernel/random/entropy_avail 2>/dev/null)
@@ -950,23 +972,28 @@ _ADDwe_() {
 	}
 
 	# [we sequential] Run sequential watch entropy.
-	if [[ -z "\${1:-}" ]] ; then
+	if [[ -z "\${1:-}" ]]
+	then
 		printintro
 		entropysequential
-	elif [[ \$1 = [Ss][Ee]* ]] || [[ \$1 = -[Ss][Ee]* ]] || [[ \$1 = --[Ss][Ee]* ]] ; then
+	elif [[ \$1 = [Ss][Ee]* ]] || [[ \$1 = -[Ss][Ee]* ]] || [[ \$1 = --[Ss][Ee]* ]]
+	then
 		printintro
 		entropysequential
 	# [we simple] Run simple watch entropy.
-	elif [[ \$1 = [Ss]* ]] || [[ \$1 = -[Ss]* ]] || [[ \$1 = --[Ss]* ]] ; then
+	elif [[ \$1 = [Ss]* ]] || [[ \$1 = -[Ss]* ]] || [[ \$1 = --[Ss]* ]]
+	then
 		printintro
 		entropysimple
 	# [we verbose] Run verbose watch entropy.
-	elif [[ \$1 = [Vv]* ]] || [[ \$1 = -[Vv]* ]] || [[ \$1 = --[Vv]* ]] ; then
+	elif [[ \$1 = [Vv]* ]] || [[ \$1 = -[Vv]* ]] || [[ \$1 = --[Vv]* ]]
+	then
 		printintro
 		bcif
 		entropyverbose
 	# [] Run default watch entropy.
-	elif [[ \$1 = "" ]] ; then
+	elif [[ \$1 = "" ]]
+	then
 		printintro
 		entropysequential
 	else
