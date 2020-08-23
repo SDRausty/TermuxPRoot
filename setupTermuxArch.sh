@@ -8,7 +8,7 @@ IFS=$'\n\t'
 set -Eeuo pipefail
 shopt -s nullglob globstar
 unset LD_PRELOAD
-VERSIONID=2.0.132
+VERSIONID=2.0.134
 ## INIT FUNCTIONS ##############################################################
 _STRPERROR_() { # run on script error
 	local RV="$?"
@@ -260,7 +260,7 @@ _INTRO_() {
 	_SETROOT_EXCEPTION_
 	if [[ -d "$INSTALLDIR" ]] && [[ -d "$INSTALLDIR"/root/bin ]] && [[ -d "$INSTALLDIR"/var/binds ]] && [[ -f "$INSTALLDIR"/bin/we ]] && [[ -f "$INSTALLDIR"/usr/bin/env ]]
 	then
-		printf "\\n\\e[0;33m%s\\e[1;33m%s\\e[0;33m.\\e[0m\\n\\n" "TermuxArch WARNING!  " "The root directory structure is correct; Cannot continue ${0##*/} install!  See '${0##*/} help' and '$STARTBIN help' for more information"
+		printf "\\n\\e[0;33m%s\\e[1;33m%s\\e[0;33m.\\e[0m\\n\\n" "TermuxArch WARNING!  " "The root directory structure of ~/${INSTALLDIR##*/} is correct; Cannot continue '${0##*/} install' to install Arch Linux in Termux PRoot!  See '${0##*/} help' and '$STARTBIN help' for more information"
 		exit 205
 	fi
 	printf "\\n\\e[0;34m 🕛 > 🕛 \\e[1;34mＴｅｒｍｕｘＡｒｃｈ %s will attempt to install Linux in \\e[0;32m%s\\e[1;34m.  Arch Linux in Termux PRoot will be available upon successful completion.  To run this BASH script again, use '!!'.  Ensure background data is not restricted.  Check the wireless connection if you do not see one o'clock 🕐 below.  \\e[0;34m" "$VERSIONID" "$INSTALLDIR"
@@ -833,7 +833,7 @@ else
 	_PRINTUSAGE_
 fi
 ## File 'updateTermuxArch.bash' will execute 'git pull' and populate git repository modules, and file 'updateTermuxArch.bash' can also be run directly in a PRoot environment.  File 'updateTermuxArch.bash's functions are not related to unrelated updating functions run by commands 'setupTermuxArch r[e[fresh]]' which have completely different update functions.
-## Files 'setupTermuxArch{.bash,.sh}' are held for backward compatibility;  Please reference file 'setupTermuxArch' as the chosen install file if help be through sharing insight about this Arch Linux in a Termux PRoot container project which can be used on a smartphone.  File 'setupTermuxArch' is the earmarked install file name for this project.  File 'setupTermuxArch' downloads as file 'setupTermuxArch.bin' through the Internet browsers into the Android Downloads folder on smartphone, and can be directly installed from there with this command 'bash ~/storage/downloads/setupTermuxArch' which will also checks if there is a newer version since the time it was download.
-# The name of file 'setupTermuxArch' in the EOF line at the end of this file is to assist scripts 'setupTermuxArch[.{bash,bin,sh}]' when if they selfupdate to the latest version when the user runs them.  These files will not selfupdate to the most recent version published if they are used inside their git repository;  In this case 'git pull' or 'updateTermuxArch.bash' can be employed to update to the newest published version:
+## Files 'setupTermuxArch{.bash,.sh}' are held for backward compatibility;  Please reference file 'setupTermuxArch' as the chosen install file if help be through sharing insight about this Arch Linux in a Termux PRoot container project which can be used on a smartphone.  File 'setupTermuxArch' is the earmarked install file name for this project.  File 'setupTermuxArch' downloads as file 'setupTermuxArch.bin' through Internet browsers into the Android Downloads folder on smartphone, and Arch Linux in Termux PRoot can be installed directly from there with this command 'bash ~/storage/downloads/setupTermuxArch.bin' which will also checks if there is a newer version since the time it was download.
+# The name of file 'setupTermuxArch' in the EOF line at the end of this file is to assist scripts 'setupTermuxArch[.{bash,bin,sh}]' when they selfupdate to the latest version when the user runs them.  These files will NOT selfupdate to the most recent version published if they are used inside their git repository;  In this case 'git pull' or 'updateTermuxArch.bash' can be employed to update to the newest published version.
 ## A very hardy thank you to contributors who are helping to make this open source project better!  Thank you very much!
 # setupTermuxArch EOF
