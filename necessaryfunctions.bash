@@ -266,10 +266,10 @@ _MAKESTARTBIN_() {
 	_PRINTUSAGE_() {
 	printf "\\e]2;%s\\007" "TermuxArch $STARTBIN help 📲"
 	printf "\\n\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN" ": Start Arch Linux as root.  This account is reserved for system administration."
-	printf "\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN c[md] cmd" ": Run Arch Linux command from Termux as root user."
+	printf "\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN c[ommand] command" ": Run Arch Linux command from Termux as root user."
 	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN u[ser]|l[ogin] user" ": Login as user.  Use " "$STARTBIN c addauser user " "first to create this user and user's home directory."
 	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN r[aw]" ": Construct the " "$STARTBIN " "proot statement from exec.../bin/.  For example " "$STARTBIN r su " "will exec su in Arch Linux."
-	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n\\e[0m" "$STARTBIN s[u] user cmd" ": Login as user and execute command.  Use " "$STARTBIN c addauser user " "first to create this user and user's home directory."
+	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n\\e[0m" "$STARTBIN s[u] user command" ": Login as user and execute command.  Use " "$STARTBIN c addauser user " "first to create this user and user's home directory."
 	}
 
 	# [] Default Arch Linux in Termux PRoot root login.
@@ -367,6 +367,7 @@ _PREPROOTDIR_() {
 	[[ ! -d home ]] && mkdir -p home
 	[[ ! -d root/bin ]] && mkdir -p root/bin
 	[[ ! -d usr/bin ]] && mkdir -p usr/bin
+	[[ ! -d var/backups/"${INSTALLDIR##*/}/root" ]] && mkdir -p var/backups/"${INSTALLDIR##*/}/root"
 	[[ ! -d var/binds ]] && mkdir -p var/binds
 }
 
@@ -465,7 +466,7 @@ _SETLANGUAGE_() { # This function uses device system settings to set locale.  To
 	then
    		ULANGUAGE="en_US"
  	fi
-	printf "\\n\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n" "Setting locales to: " "Language " ">> $ULANGUAGE << " "Region"
+	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n" "Setting locales to: " "Language " ">> $ULANGUAGE << " "Region"
 }
 
 _SETLOCALE_() { # This function uses device system settings to set locale.  To generate locales in a preferred language, you can use "Settings > Language & Keyboard > Language" in Android; Then run `setupTermuxArch.bash r for a quick system refresh.
