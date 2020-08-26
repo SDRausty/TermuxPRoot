@@ -7,7 +7,7 @@
 IFS=$'\n\t'
 set -Eeuo pipefail
 shopt -s nullglob globstar
-VERSIONID=2.0.163
+VERSIONID=2.0.166
 ## INIT FUNCTIONS ##############################################################
 _STRPERROR_() { # run on script error
 	local RV="$?"
@@ -95,7 +95,7 @@ _CHKSELF_() {	# compare file setupTermuxArc.bash and the file being used
 	then	# find and unset functions
 		unset -f $(grep \_\( "${0##*/}"|cut -d"(" -f 1|sort -u|sed ':a;N;$!ba;s/\n/ /g')
 		# find variables
-		UNVAR="$(grep '="' "${0##*/}"|grep -v -e \] -e ARGS -e TAMPDIR -e WDIR -e WFDIR|grep -v +|sed 's/declare -a//g'|sed 's/declare//g'|sed 's/export//g'|sed -e "s/[[:space:]]\+//g"|cut -d"=" -f 1|sort -u)"
+		UNVAR="$(grep '="' "${0##*/}"|grep -v -e \] -e ARGS -e TAMPDIR -e WDIR -e WFDIR -e INSTALLDIR|grep -v +|sed 's/declare -a//g'|sed 's/declare//g'|sed 's/export//g'|sed -e "s/[[:space:]]\+//g"|cut -d"=" -f 1|sort -u)"
 		# unset variables
 		for UNSET in $UNVAR
 		do
@@ -841,4 +841,3 @@ fi
 ## Very many hardy thank yous to contributors who are helping and have already helped to make this open source resource better!  Please accept a wholehearted thank you for using this product!
 # The name of file 'setupTermuxArch' in the EOF line at the end of this file is to assist scripts 'setupTermuxArch[.{bash,bin,sh}]' when they selfupdate to the latest version when the user runs them.
 # setupTermuxArch EOF
-	printf '\033]2; Run bash %s again...\007' "${0##*/} $ARGS"

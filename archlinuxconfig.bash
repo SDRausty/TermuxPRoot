@@ -14,22 +14,22 @@ _ADDAUSER_() {
 		printf "\\e[1;31m%s\\\\n" "Use: addauser username: exiting..."
 		exit 201
 	else
+		printf "\\\\e[0;32m%s\\\n\\\\e[1;32m" "Adding Arch Linux in Termux PRoot user '\$1' and creating Arch Linux in Termux PRoot user \$1's home directory in /home/\$1:"
 		sed -i "s/required/sufficient/g" /etc/pam.d/su
 		sed -i "s/^#auth/auth/g" /etc/pam.d/su
 		useradd -s /bin/bash "\$1" -U
 		usermod "\$1" -aG wheel
-		printf "\\n\\e[1;32m"
 		passwd -d "\$1"
 		chage -I -1 -m 0 -M -1 -E -1 "\$1"
 		[[ -d /etc/sudoers.d ]] && printf "%s\\n" "\$1 ALL=(ALL) ALL" >> /etc/sudoers.d/"\$1"
 		sed -i "s/\$1:x/\$1:/g" /etc/passwd
 		cp -r /root /home/"\$1"
-		printf "\\n%s\\e[0m\\n\\n" "Added Arch Linux in Termux PRoot user \$1 and created Arch Linux in Termux PRoot user \$1's home directory in /home/\$1.  To use this account run '$STARTBIN login \$1'.  To add user accounts use '$STARTBIN command addauser username' in the default Termux shell.  Please remember not to nest proot in proot unknowingly by using '$STARTBIN' in '$STARTBIN' as this is known to cause issues for PRoot in Termux users."
+		printf "\\\\e[0;32m%s\\\\e[1;32m%s\\\\e[0;32m%s\\\\e[0m\\\\n" "Added Arch Linux in Termux PRoot user '\$1'. Configured user '\$1' for use with the Arch Linux command 'sudo'.  Created Arch Linux in Termux PRoot user \$1's home directory in /home/\$1.  To use this account run '$STARTBIN login \$1' from the shell in Termux.  To add user accounts use " "'$STARTBIN command addauser username'" " in the default Termux shell.  Please remember not to nest proot in proot unknowingly by using '$STARTBIN' in '$STARTBIN' as this is known to cause issues for PRoot in Termux users."
 	fi
 	}
 		_PMFSESTRING_() { 
-		printf "\\e[1;31m%s\\e[1;37m%s\\e[1;32m%s\\e[1;37m%s\\n\\n" "Signal generated in '\$1' : Cannot complete task : " "Continuing..."
-		printf "\\e[1;34m%s\\e[0;34m%s\\e[1;34m%s\\e[0;34m%s\\e[1;34m%s\\e[0m\\n\\n" "  If you find improvements for " "setupTermuxArch" " and " "\$0" " please open an issue and accompanying pull request."
+		printf "\\\\e[1;31m%s\\e[1;37m%s\\\\e[1;32m%s\\\\e[1;37m%s\\\\n\\\\n" "Signal generated in '\$1' : Cannot complete task : " "Continuing..."
+		printf "\\\\e[1;34m%s\\\\e[0;34m%s\\\\e[1;34m%s\\\\e[0;34m%s\\\\e[1;34m%s\\\\e[0m\\\\n\\\\n" "  If you find improvements for " "setupTermuxArch" " and " "\$0" " please open an issue and accompanying pull request."
 	}
 	_FUNADDU_ "\$@"
 	# addauser EOF
@@ -536,18 +536,18 @@ _ADDkeys_() {
 	fi
 	ARGS="\${KEYRINGS[@]}"
 	printf '\033]2;  🔑 TermuxArch %s 📲 \007' "'\${0##*/} \$ARGS'"
-	printf "\\\\n\\\\e[1;32m==> \\\\e[1;37m%s \\\\e[0;32m%s \\\\e[1;32m%s %s \\\\e[0m%s...\\\\n" "Running" "TermuxArch" "\$(basename "\$0")" "\$ARGS" "\$VERSIONID"
+	printf "\\\\n\\\\e[1;32m==> \\\\e[1;37m%s \\\\e[0;32m%s \\\\e[1;32m%s %s \\\\e[0m%s...\\\\n" "Running" "TermuxArch" "\${0##*/}" "\$ARGS" "\$VERSIONID"
 	mv usr/lib/gnupg/scdaemon{,_} 2>/dev/null ||:
-	printf "\\\\n\\\\e[1;34m[2/2] \\\\e[0;34mWhen \\\\e[0;37mgpg: Generating pacman keyring master key\\\\e[0;34m appears on the screen, the installation process can be accelerated.  The system desires a lot of entropy at this part of the install procedure.  To generate as much entropy as possible quickly, watch and listen to a file on your device.  \\\\n\\\\nThe program \\\\e[1;32mpacman-key\\\\e[0;34m will want as much entropy as possible when generating keys.  Entropy is also created through tapping, sliding, one, two and more fingers tapping with short and long taps.  When \\\\e[0;37mgpg: Generating pacman keyring master key\\\\e[0;34m appears on the screen, use any of these simple methods to accelerate the installation process if it is stalled.  Put even simpler, just do something on device.  Browsing files will create entropy on device.  Slowly swiveling the device in space and time will accelerate the installation process.  This method alone might not generate enough entropy (a measure of randomness in a closed system) for the process to complete quickly.  Use \\\\e[1;32mbash ~%s/bin/we \\\\e[0;34min a new Termux session to and watch entropy on device.\\\\n\\\\n\\\\e[1;32m==>\\\\e[0m Running \\\\e[1mpacman-key --init\\\\e[0;32m...\\\\n" "${DARCH}"
-	pacman-key --init ||:
+	printf "\\\\n\\\\e[1;32m[1/2] \\\\e[0;34mWhen \\\\e[0;37mgpg: Generating pacman keyring master key\\\\e[0;34m appears on the screen, the installation process can be accelerated.  The system desires a lot of entropy at this part of the install procedure.  To generate as much entropy as possible quickly, watch and listen to a file on your device.  \\\\n\\\\nThe program \\\\e[1;32mpacman-key\\\\e[0;34m will want as much entropy as possible when generating keys.  Entropy is also created through tapping, sliding, one, two and more fingers tapping with short and long taps.  When \\\\e[0;37mgpg: Generating pacman keyring master key\\\\e[0;34m appears on the screen, use any of these simple methods to accelerate the installation process if it is stalled.  Put even simpler, just do something on device.  Browsing files will create entropy on device.  Slowly swiveling the device in space and time will accelerate the installation process.  This method alone might not generate enough entropy (a measure of randomness in a closed system) for the process to complete quickly.  Use \\\\e[1;32mbash ~%s/bin/we \\\\e[0;34min a new Termux session to and watch entropy on device.\\\\n\\\\n\\\\e[1;32m==>\\\\e[0m Running \\\\e[1mpacman-key --init\\\\e[0;32m...\\\\n" "$DARCH"
+	pacman-key --init || sudo pacman-key --init ||:
 	chmod 700 /etc/pacman.d/gnupg
-	pacman-key --populate ||:
-	printf "\\\\n\\\\e[1;32m==>\\\\e[0m Running \\\\e[1mpacman -S \\\\$ARGS --noconfirm --color=always\\\\e[0;32m...\\\\n"
-	pacman -S "\${KEYRINGS[@]}" --noconfirm --color=always ||:
-	printf "\\\\n\\\\e[1;34m[2/2] \\\\e[0;34mWhen \\\\e[1;37mAppending keys from archlinux.gpg\\\\e[0;34m appears on the screen, the installation process can be accelerated.  The system desires a lot of entropy at this part of the install procedure.  To generate as much entropy as possible quickly, watch and listen to a file on your device.  \\\\n\\\\nThe program \\\\e[1;32mpacman-key\\\\e[0;34m will want as much entropy as possible when generating keys.  Entropy is also created through tapping, sliding, one, two and more fingers tapping with short and long taps.  When \\\\e[1;37mAppending keys from archlinux.gpg\\\\e[0;34m appears on the screen, use any of these simple methods to accelerate the installation process if it is stalled.  Put even simpler, just do something on device.  Browsing files will create entropy on device.  Slowly swiveling the device in space and time will accelerate the installation process.  This method alone might not generate enough entropy (a measure of randomness in a closed system) for the process to complete quickly.  Use \\\\e[1;32mbash ~%s/bin/we \\\\e[0;34min a new Termux session to watch entropy on device.\\\\n\\\\n\\\\e[1;32m==>\\\\e[0m Running \\\\e[1mpacman-key --populate\\\\e[0;32m...\\\\n" "${DARCH}"
-	pacman-key --populate ||:
+	pacman-key --populate || sudo pacman-key --populate ||:
+	printf "\\\\n\\\\e[1;32m==>\\\\e[0m Running \\\\e[1mpacman -S %s --noconfirm --color=always\\\\e[0;32m...\\\\n" "\$ARGS"
+	pacman -S "\${KEYRINGS[@]}" --noconfirm --color=always || sudo pacman -S "\${KEYRINGS[@]}" --noconfirm --color=always ||:
+	printf "\\\\n\\\\e[1;32m[2/2] \\\\e[0;34mWhen \\\\e[1;37mAppending keys from archlinux.gpg\\\\e[0;34m appears on the screen, the installation process can be accelerated.  The system desires a lot of entropy at this part of the install procedure.  To generate as much entropy as possible quickly, watch and listen to a file on your device.  \\\\n\\\\nThe program \\\\e[1;32mpacman-key\\\\e[0;34m will want as much entropy as possible when generating keys.  Entropy is also created through tapping, sliding, one, two and more fingers tapping with short and long taps.  When \\\\e[1;37mAppending keys from archlinux.gpg\\\\e[0;34m appears on the screen, use any of these simple methods to accelerate the installation process if it is stalled.  Put even simpler, just do something on device.  Browsing files will create entropy on device.  Slowly swiveling the device in space and time will accelerate the installation process.  This method alone might not generate enough entropy (a measure of randomness in a closed system) for the process to complete quickly.  Use \\\\e[1;32mbash ~%s/bin/we \\\\e[0;34min a new Termux session to watch entropy on device.\\\\n\\\\n\\\\e[1;32m==>\\\\e[0m Running \\\\e[1mpacman-key --populate\\\\e[0;32m...\\\\n" "$DARCH"
+	pacman-key --populate || sudo pacman-key --populate ||:
 	printf "\\\\e[1;32m==>\\\\e[0m Running \\\\e[1mpacman -Ss keyring --color=always\\\\e[0m...\\\\n"
-	pacman -Ss keyring --color=always ||:
+	pacman -Ss keyring --color=always || sudo pacman -Ss keyring --color=always ||:
 	# keys EOF
 	EOM
 	chmod 700 root/bin/keys
@@ -634,9 +634,9 @@ _ADDmakeyay_() {
 		cd 
 		[ ! -f /var/lock/patchmakepkg.lock ] && patchmakepkg
 		! fakeroot ls >/dev/null && makefakeroottcp
-		(git clone https://aur.archlinux.org/yay.git && cd yay && _PRMAKE_ && makepkg -irs --noconfirm) || printf "\\\\e[1;37m%s\\\\e[0m\\\\n" "Continuing to build and install yay..." && cd yay && _PRMAKE_ && makepkg -irs --noconfirm || printf "\\\\e[1;31m%s\\\\e[0%s\\\\n" "Received exiting signal," " maybe the data connection?""Something went wrong," " maybe the data connection?""Something went wrong," " maybe the data connection?"
-		yay cmatrix || printf "\\\\e[1;31m%s\\\\e[0%s\\\\n" "Received exiting signal," " maybe the data connection?"
-		printf "\\\\e[1;37m%s\\\\e[0m\\\\n" "Building and installing yay: DONE"
+		(git clone https://aur.archlinux.org/yay.git&&cd yay&&_PRMAKE_&&makepkg -irs --noconfirm)||printf "\\\\e[1;37m%s\\\\e[0m\\\\n" "Continuing to build and install yay..."&&cd yay&&_PRMAKE_&&makepkg -irs --noconfirm||printf "\\\\e[1;31m%s\\\\e[0%s\\\\n" "Received signal," " maybe the data connection?"
+		yay cmatrix --noconfirm||printf "\\\\e[1;31m%s\\\\e[0%s\\\\n" "Received signal," " maybe the data connection?"
+		printf "\\\\e[1;37m%s\\\\e[0m\\\\n" "Building and installing yay: " "DONE"
 	fi
 	# makeyay EOF 
 	EOM
