@@ -18,13 +18,12 @@ _ADDAUSER_() {
 		sed -i "s/^#auth/auth/g" /etc/pam.d/su
 		useradd -s /bin/bash "\$1" -U
 		usermod "\$1" -aG wheel
-		printf "\\n\\e[1;32m"
 		passwd -d "\$1"
 		chage -I -1 -m 0 -M -1 -E -1 "\$1"
 		[[ -d /etc/sudoers.d ]] && printf "%s\\n" "\$1 ALL=(ALL) ALL" >> /etc/sudoers.d/"\$1"
 		sed -i "s/\$1:x/\$1:/g" /etc/passwd
 		cp -r /root /home/"\$1"
-		printf "\\n%s\\e[0m\\n\\n" "Added Arch Linux in Termux PRoot user \$1 and created Arch Linux in Termux PRoot user \$1's home directory in /home/\$1.  To use this account run '$STARTBIN login \$1'.  To add user accounts use '$STARTBIN command addauser username' in the default Termux shell.  Please remember not to nest proot in proot unknowingly by using '$STARTBIN' in '$STARTBIN' as this is known to cause issues for PRoot in Termux users."
+		printf "%s\\n" "Added user \$1 and directory /home/\$1 created.  To use this account run '$STARTBIN login \$1' in Termux.  Remember please not to nest proot in proot by running '$STARTBIN' in '$STARTBIN' as this may cause issues."
 	fi
 	}
 		_PMFSESTRING_() { 
@@ -231,7 +230,7 @@ _ADDcsystemctl_() {
 	_CFLHDR_ root/bin/csystemctl
 	cat >> root/bin/csystemctl <<- EOM
 	INSTALLDIR="$INSTALLDIR"
-	printf "\\e[38;5;148m%s\\e[0m\\n" "Installing /usr/bin/systemctl replacement: "
+	printf "%s\\n" "Installing /usr/bin/systemctl replacement: "
 	[ -f /var/lock/csystemctl.lock ] && printf "%s\\n" "Already installed /usr/bin/systemctl replacement: DONE" && exit
 	declare COMMANDP
 	COMMANDP="\$(command -v python3)" || printf "%s\\n" "Command python3 not found: continuing..."
@@ -240,15 +239,15 @@ _ADDcsystemctl_() {
 	# path is /usr/local/bin because updates overwrite /usr/bin/systemctl and may make systemctl-replacement obsolete
 	# backup original binary
 	mv /usr/bin/systemctl $INSTALLDIR/var/backups/${INSTALLDIR##*/}/systemctl.\$SDATE.bkp
-	printf "\\e[38;5;148m%s\\n\\e[0m" "Moved /usr/bin/systemctl to $INSTALLDIR/var/backups/${INSTALLDIR##*/}/systemctl.\$SDATE.bkp"
-	printf "%s\\n" "Getting replacement systemctl from https://raw.githubusercontent.com/TermuxArch/docker-systemctl-replacement/master/files/docker/systemctl3.py"
-	# Arch Linux package 'systemctl' updates will mot halt functioning as /usr/local/bin precedes /usr/bin in the PATH
-	# downlaodvand copy to both /usr/local/bin and /usr/bin
-	curl https://raw.githubusercontent.com/TermuxArch/docker-systemctl-replacement/master/files/docker/systemctl3.py|tee /usr/bin/systemctl /usr/local/bin/systemctl >/dev/null
+	printf "%s\\n" "Moved /usr/bin/systemctl to $INSTALLDIR/var/backups/${INSTALLDIR##*/}/systemctl.\$SDATE.bkp"
+	printf "%s\\n" "Getting replacement systemctl from https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl3.py"
+	# copy to both /usr/local/bin and /usr/bin
+	# updates won't halt functioning since /usr/local/bin precedes /usr/bin in PATH
+	curl https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/master/files/docker/systemctl3.py | tee /usr/bin/systemctl /usr/local/bin/systemctl >/dev/null
 	chmod 700 /usr/bin/systemctl /usr/local/bin/systemctl
 	[ ! -e /run/lock ] && mkdir -p /run/lock
 	touch /var/lock/csystemctl.lock
-	printf "\\e[38;5;148m%s\\e[1;32m%s\\e[0m\\n" "Installing systemctl replacement in /usr/local/bin and /usr/bin: DONE"
+	printf "%s\\n" "Installing systemctl replacement in /usr/local/bin and /usr/bin: DONE"
 	# csystemctl EOF
 	EOM
 	chmod 700 root/bin/csystemctl
@@ -490,7 +489,7 @@ _ADDkeys_() {
 	declare -a KEYRINGS
 
 	_TRPET_() { # on exit
-		printf "\\\\e[?25h\\\\e[0m"
+		printf "\\e[?25h\\e[0m"
 		set +Eeuo pipefail
 	 	_PRINTTAIL_ "\$KEYRINGS[@]"
 	}
@@ -535,18 +534,18 @@ _ADDkeys_() {
 		KEYRINGS="\$@"
 	fi
 	ARGS="\${KEYRINGS[@]}"
-	printf '\033]2;  🔑 TermuxArch %s 📲 \007' "'\${0##*/} \$ARGS'"
+	printf '\033]2;  🔑 TermuxArch '"\$(basename "\$0") \$ARGS"' 📲 \007'
 	printf "\\\\n\\\\e[1;32m==> \\\\e[1;37m%s \\\\e[0;32m%s \\\\e[1;32m%s %s \\\\e[0m%s...\\\\n" "Running" "TermuxArch" "\$(basename "\$0")" "\$ARGS" "\$VERSIONID"
 	mv usr/lib/gnupg/scdaemon{,_} 2>/dev/null ||:
-	printf "\\\\n\\\\e[1;34m[2/2] \\\\e[0;34mWhen \\\\e[0;37mgpg: Generating pacman keyring master key\\\\e[0;34m appears on the screen, the installation process can be accelerated.  The system desires a lot of entropy at this part of the install procedure.  To generate as much entropy as possible quickly, watch and listen to a file on your device.  \\\\n\\\\nThe program \\\\e[1;32mpacman-key\\\\e[0;34m will want as much entropy as possible when generating keys.  Entropy is also created through tapping, sliding, one, two and more fingers tapping with short and long taps.  When \\\\e[0;37mgpg: Generating pacman keyring master key\\\\e[0;34m appears on the screen, use any of these simple methods to accelerate the installation process if it is stalled.  Put even simpler, just do something on device.  Browsing files will create entropy on device.  Slowly swiveling the device in space and time will accelerate the installation process.  This method alone might not generate enough entropy (a measure of randomness in a closed system) for the process to complete quickly.  Use \\\\e[1;32mbash ~%s/bin/we \\\\e[0;34min a new Termux session to and watch entropy on device.\\\\n\\\\n\\\\e[1;32m==>\\\\e[0m Running \\\\e[1mpacman-key --init\\\\e[0;32m...\\\\n" "${DARCH}"
+	printf "\n\e[0;34m[1/2] When \e[0;37mgpg: Generating pacman keyring master key\e[0;34m appears on the screen, the installation process can be accelerated.  The system desires a lot of entropy at this part of the install procedure.  To generate as much entropy as possible quickly, watch and listen to a file on your device.  \n\nThe program \e[1;32mpacman-key\e[0;34m will want as much entropy as possible when generating keys.  Entropy is also created through tapping, sliding, one, two and more fingers tapping with short and long taps.  When \e[0;37mgpg: Generating pacman keyring master key\e[0;34m appears on the screen, use any of these simple methods to accelerate the installation process if it is stalled.  Put even simpler, just do something on device.  Browsing files will create entropy on device.  Slowly swiveling the device in space and time will accelerate the installation process.  This method alone might not generate enough entropy (a measure of randomness in a closed system) for the process to complete quickly.  Use \e[1;32mbash ~${DARCH}/bin/we \e[0;34min a new Termux session to and watch entropy on device.\n\n\e[1;32m==>\e[0m Running \e[1mpacman-key --init\e[0;32m...\n"
 	pacman-key --init ||:
 	chmod 700 /etc/pacman.d/gnupg
 	pacman-key --populate ||:
-	printf "\\\\n\\\\e[1;32m==>\\\\e[0m Running \\\\e[1mpacman -S \\\\$ARGS --noconfirm --color=always\\\\e[0;32m...\\\\n"
+	printf "\n\e[1;32m==>\e[0m Running \e[1mpacman -S \$ARGS --noconfirm --color=always\e[0;32m...\n"
 	pacman -S "\${KEYRINGS[@]}" --noconfirm --color=always ||:
-	printf "\\\\n\\\\e[1;34m[2/2] \\\\e[0;34mWhen \\\\e[1;37mAppending keys from archlinux.gpg\\\\e[0;34m appears on the screen, the installation process can be accelerated.  The system desires a lot of entropy at this part of the install procedure.  To generate as much entropy as possible quickly, watch and listen to a file on your device.  \\\\n\\\\nThe program \\\\e[1;32mpacman-key\\\\e[0;34m will want as much entropy as possible when generating keys.  Entropy is also created through tapping, sliding, one, two and more fingers tapping with short and long taps.  When \\\\e[1;37mAppending keys from archlinux.gpg\\\\e[0;34m appears on the screen, use any of these simple methods to accelerate the installation process if it is stalled.  Put even simpler, just do something on device.  Browsing files will create entropy on device.  Slowly swiveling the device in space and time will accelerate the installation process.  This method alone might not generate enough entropy (a measure of randomness in a closed system) for the process to complete quickly.  Use \\\\e[1;32mbash ~%s/bin/we \\\\e[0;34min a new Termux session to watch entropy on device.\\\\n\\\\n\\\\e[1;32m==>\\\\e[0m Running \\\\e[1mpacman-key --populate\\\\e[0;32m...\\\\n" "${DARCH}"
+	printf "\n\e[0;34m[2/2] When \e[1;37mAppending keys from archlinux.gpg\e[0;34m appears on the screen, the installation process can be accelerated.  The system desires a lot of entropy at this part of the install procedure.  To generate as much entropy as possible quickly, watch and listen to a file on your device.  \n\nThe program \e[1;32mpacman-key\e[0;34m will want as much entropy as possible when generating keys.  Entropy is also created through tapping, sliding, one, two and more fingers tapping with short and long taps.  When \e[1;37mAppending keys from archlinux.gpg\e[0;34m appears on the screen, use any of these simple methods to accelerate the installation process if it is stalled.  Put even simpler, just do something on device.  Browsing files will create entropy on device.  Slowly swiveling the device in space and time will accelerate the installation process.  This method alone might not generate enough entropy (a measure of randomness in a closed system) for the process to complete quickly.  Use \e[1;32mbash ~${DARCH}/bin/we \e[0;34min a new Termux session to watch entropy on device.\n\n\e[1;32m==>\e[0m Running \e[1mpacman-key --populate\e[0;32m...\n"
 	pacman-key --populate ||:
-	printf "\\\\e[1;32m==>\\\\e[0m Running \\\\e[1mpacman -Ss keyring --color=always\\\\e[0m...\\\\n"
+	printf "\e[1;32m==>\e[0m Running \e[1mpacman -Ss keyring --color=always\e[0m...\n"
 	pacman -Ss keyring --color=always ||:
 	# keys EOF
 	EOM
@@ -557,11 +556,11 @@ _ADDMOTA_() {
 	if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX86_64" ]]
 	then
 		cat > etc/mota <<- EOM
-		printf "\\\\n\\\\e[1;34m%s\\\\n%s\\\\e[0;34m%s\\\\n\\\\e[1;34m%s\\\\e[0;34m%s\\\\n\\\\e[1;34m%s\\\\e[0;34m%s\\\\n\\\\e[1;34m%s\\\\e[0;34m%s\\\\n\\\\n\\\\e[1;34m%s\\\\e[0m%s\\\\n\\\\e[1;34m%s\\\\e[0;34m%s\\\\e[1;34m%s\\\\e[0;34m%s\\\\n\\\\e[1;34m%s\\\\e[0m%s\\\\n\\\\n" "Welcome to Arch Linux in Termux!" "Install a package: " "pacman -S package" "More  information: " "pacman -[D|F|Q|R|S|T|U]h" "Search   packages: " "pacman -Ss query" "Upgrade  packages: " "pacman -Syu" "Chat:  " "https://wiki.termux.com/wiki/Community" "Help: " "info query " "and " "man query" "IRC: " "wiki.archlinux.org/index.php/IRC_channel"
+		printf "\\n\\e[1;34m%s\\n%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\n\\e[1;34m%s\\e[0m%s\\n\\e[1;34m%s\\e[0;34m%s\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0m%s\\n\\n" "Welcome to Arch Linux in Termux!" "Install a package: " "pacman -S package" "More  information: " "pacman -[D|F|Q|R|S|T|U]h" "Search   packages: " "pacman -Ss query" "Upgrade  packages: " "pacman -Syu" "Chat:  " "https://wiki.termux.com/wiki/Community" "Help: " "info query " "and " "man query" "IRC: " "wiki.archlinux.org/index.php/IRC_channel"
 		EOM
 	else
 		cat > etc/mota <<- EOM
-		printf "\\\\n\\\\e[1;34m%s\\\\n%s\\\\e[0;34m%s\\\\n\\\\e[1;34m%s\\\\e[0;34m%s\\\\n\\\\e[1;34m%s\\\\e[0;34m%s\\\\n\\\\e[1;34m%s\\\\e[0;34m%s\\\\n\\\\n\\\\e[1;34m%s\\\\e[0m%s\\\\n\\\\e[1;34m%s\\\\e[0m%s\\\\n\\\\e[1;34m%s\\\\e[0;34m%s\\\\e[1;34m%s\\\\e[0;34m%s\\\\n\\\\e[1;34m%s\\\\e[0m%s\\\\n\\\\n" "Welcome to Arch Linux in Termux!" "Install a package: " "pacman -S package" "More  information: " "pacman -[D|F|Q|R|S|T|U]h" "Search   packages: " "pacman -Ss query" "Upgrade  packages: " "pacman -Syu" "Chat:  " "https://wiki.termux.com/wiki/Community" "Forum: " "https://archlinuxarm.org/forum" "Help: " "info query " "and " "man query" "IRC: " "wiki.archlinux.org/index.php/IRC_channel"
+		printf "\\n\\e[1;34m%s\\n%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0;34m%s\\n\\n\\e[1;34m%s\\e[0m%s\\n\\e[1;34m%s\\e[0m%s\\n\\e[1;34m%s\\e[0;34m%s\\e[1;34m%s\\e[0;34m%s\\n\\e[1;34m%s\\e[0m%s\\n\\n" "Welcome to Arch Linux in Termux!" "Install a package: " "pacman -S package" "More  information: " "pacman -[D|F|Q|R|S|T|U]h" "Search   packages: " "pacman -Ss query" "Upgrade  packages: " "pacman -Syu" "Chat:  " "https://wiki.termux.com/wiki/Community" "Forum: " "https://archlinuxarm.org/forum" "Help: " "info query " "and " "man query" "IRC: " "wiki.archlinux.org/index.php/IRC_channel"
 		EOM
 	fi
 }
@@ -598,7 +597,7 @@ _ADDMOTD_() {
 
 _ADDMOTO_() {
 	cat > etc/moto <<- EOM
-	printf "\\\\n\\\\e[1;34mShare Your Arch Linux in Termux Experience!\\\\n\\\\n\\\\e[1;34mChat: \\\\e[0mwiki.termux.com/wiki/Community\\\\n\\\\e[1;34mHelp: \\\\e[0;34minfo query \\\\e[1;34mand \\\\e[0;34mman query\\\\n\\\\e[1;34mIRC:  \\\\e[0mwiki.archlinux.org/index.php/IRC_channel\\\\n\\\\n\\\\e[0m"
+	printf "\n\e[1;34mShare Your Arch Linux in Termux Experience!\n\n\e[1;34mChat: \e[0mwiki.termux.com/wiki/Community\n\e[1;34mHelp: \e[0;34minfo query \e[1;34mand \e[0;34mman query\n\e[1;34mIRC:  \e[0mwiki.archlinux.org/index.php/IRC_channel\n\n\e[0m"
 	EOM
 }
 
@@ -634,8 +633,7 @@ _ADDmakeyay_() {
 		cd 
 		[ ! -f /var/lock/patchmakepkg.lock ] && patchmakepkg
 		! fakeroot ls >/dev/null && makefakeroottcp
-		(git clone https://aur.archlinux.org/yay.git && cd yay && _PRMAKE_ && makepkg -irs --noconfirm) || printf "\\\\e[1;37m%s\\\\e[0m\\\\n" "Continuing to build and install yay..." && cd yay && _PRMAKE_ && makepkg -irs --noconfirm || printf "\\\\e[1;31m%s\\\\e[0%s\\\\n" "Received exiting signal," " maybe the data connection?""Something went wrong," " maybe the data connection?""Something went wrong," " maybe the data connection?"
-		yay cmatrix || printf "\\\\e[1;31m%s\\\\e[0%s\\\\n" "Received exiting signal," " maybe the data connection?"
+		(git clone https://aur.archlinux.org/yay.git && cd yay && _PRMAKE_ && makepkg -irs --noconfirm) || printf "\\\\e[1;37m%s\\\\e[0m\\\\n" "Continuing to build and install yay..." && cd yay && _PRMAKE_ && makepkg -irs --noconfirm
 		printf "\\\\e[1;37m%s\\\\e[0m\\\\n" "Building and installing yay: DONE"
 	fi
 	# makeyay EOF 
@@ -751,7 +749,16 @@ _ADDprofile_() {
 
 _ADDt_() {
 	_CFLHDR_ root/bin/t
-	printf "%s\\n%s\\n%s\\n" "[ \"\$UID\" = \"0\" ] && printf \"\\e[1;31m%s\\e[1;37m%s\\e[1;31m%s\\n\" \"Cannot run '\${0##*/}' as root user :\" \" the command 'addauser username' creates user accounts in $INSTALLDIR : the command '$STARTBIN command addauser username' can create user accounts in $INSTALLDIR from Termux : a default user account is created during setup : the default username 'user' can be used to access the PRoot system employing a user account : command '$STARTBIN help' has more information : \" \"exiting...\" && exit" "[ ! -x \"\$(command -v tree)\" ] && sudo pci tree && tree || tree" "# t EOF" >> root/bin/t
+	cat >> root/bin/t <<- EOM
+	if [[ ! -x "\$(command -v tree)" ]]
+	then
+		pacman --noconfirm --color=always -S tree
+		tree "\$@"
+	else
+		tree "\$@"
+	fi
+	# t EOF
+	EOM
 	chmod 700 root/bin/t
 }
 
@@ -847,7 +854,7 @@ _ADDv_() {
 		ARGS=("\$@")
 	fi
 	EOM
-	printf "%s\\n%s\\n%s\\n" "[ \"\$UID\" = \"0\" ] && printf \"\\e[1;31m%s\\e[1;37m%s\\e[1;31m%s\\n\" \"Cannot run '\${0##*/}' as root user :\" \" the command 'addauser username' creates user accounts in $INSTALLDIR : the command '$STARTBIN command addauser username' can create user accounts in $INSTALLDIR from Termux : a default user account is created during setup : the default username 'user' can be used to access the PRoot system employing a user account : command '$STARTBIN help' has more information : \" \"exiting...\" && exit" "[ ! -x \"\$(command -v vim)\" ] && sudo pci vim && vim \"\${ARGS[@]}\" || vim \"\${ARGS[@]}\"" "# v EOF" >> root/bin/v
+	printf "%s\\n# v EOF#" "[ ! -x \"\$(command -v vim)\" ] && ( [ \"\$UID\" = \"0\" ] && pacman --noconfirm --color=always -S vim || sudo pacman --noconfirm --color=always -S vim ) && vim  \"\${ARGS[@]}\" || vim  \"\${ARGS[@]}\"" >> root/bin/v
 	chmod 700 root/bin/v
 }
 
@@ -1000,7 +1007,7 @@ _ADDwe_() {
 
 _ADDyt_() {
 	_CFLHDR_ root/bin/yt
-	printf "%s\\n%s\\n%s\\n" "[ \"\$UID\" = \"0\" ] && printf \"\\e[1;31m%s\\e[1;37m%s\\e[1;31m%s\\n\" \"Cannot run '\${0##*/}' as root user :\" \" the command 'addauser username' creates user accounts in $INSTALLDIR : the command '$STARTBIN command addauser username' can create user accounts in $INSTALLDIR from Termux : a default user account is created during setup : the default username 'user' can be used to access the PRoot system employing a user account : command '$STARTBIN help' has more information : \" \"exiting...\" && exit" "[ ! -x \"\$(command -v youtube-dl)\" ] && sudo pci youtube-dl && youtube-dl \"\$@\" || youtube-dl \"\$@\" " "# yt EOF" >> root/bin/yt
+	printf "%s\\n%s\\n%s\\n" "[ \"\$UID\" = \"0\" ] && printf \"\\e[1;31m%s\\e[1;37m%s\\e[1;31m%s\\n\" \"Cannot run '\${0##*/}' as root user :\" \" the command 'addauser username' can create user accounts in $INSTALLDIR : the command '$STARTBIN command addauser username' can create user accounts in $INSTALLDIR from Termux : the command '$STARTBIN help' has more information : \" \"exiting...\" && exit" "[ ! -x \"\$(command -v youtube-dl)\" ] && sudo pci youtube-dl && youtube-dl \"\$@\" || youtube-dl \"\$@\" " "# yt EOF" >> root/bin/yt
 	chmod 700 root/bin/yt
 }
 
