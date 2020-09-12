@@ -8,7 +8,7 @@ IFS=$'\n\t'
 set -Eeuo pipefail
 shopt -s nullglob globstar
 umask 022
-VERSIONID=2.0.228
+VERSIONID=2.0.229
 ## INIT FUNCTIONS ##############################################################
 _STRPERROR_() { # run on script error
 	local RV="$?"
@@ -230,8 +230,8 @@ _DWNL_() { # download TermuxArch from Github
 		FILE[sha]="https://raw.githubusercontent.com/TermuxArch/gensTermuxArch/master/setupTermuxArch.sha512"
 		FILE[tar]="https://raw.githubusercontent.com/TermuxArch/gensTermuxArch/master/setupTermuxArch.tar.gz"
 	else	# get stable version from:
-		FILE[sha]="https://raw.githubusercontent.com/TermuxArch/TermuxArch/master/setupTermuxArch.sha512"
-		FILE[tar]="https://raw.githubusercontent.com/TermuxArch/TermuxArch/master/setupTermuxArch.tar.gz"
+		FILE[sha]="https://raw.githubusercontent.com/TermuxPRoot/TermuxPRoot/master/setupTermuxArch.sha512"
+		FILE[tar]="https://raw.githubusercontent.com/TermuxPRoot/TermuxPRoot/master/setupTermuxArch.tar.gz"
 	fi
 	if [[ "$DM" = aria2 ]]
 	then	# use https://github.com/aria2/aria2
