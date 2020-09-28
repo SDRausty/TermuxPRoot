@@ -5,8 +5,8 @@
 # https://sdrausty.github.io/TermuxArch/CONTRIBUTORS Thank you for your help.
 ################################################################################
 
-BINFNSTP=finishsetup.bash
-LC_TYPE=( "LANG" "LANGUAGE" "LC_ADDRESS" "LC_COLLATE" "LC_CTYPE" "LC_IDENTIFICATION" "LC_MEASUREMENT" "LC_MESSAGES" "LC_MONETARY" "LC_NAME" "LC_NUMERIC" "LC_PAPER" "LC_TELEPHONE" "LC_TIME" )
+BINFNSTP="finishsetup.bash"
+LC_TYPE=("LANG" "LANGUAGE" "LC_ADDRESS" "LC_COLLATE" "LC_CTYPE" "LC_IDENTIFICATION" "LC_MEASUREMENT" "LC_MESSAGES" "LC_MONETARY" "LC_NAME" "LC_NUMERIC" "LC_PAPER" "LC_TELEPHONE" "LC_TIME")
 
 _ADDADDS_() {
 	_ADDAUSER_
@@ -14,7 +14,7 @@ _ADDADDS_() {
 	_ADDMOTD_
 	_ADDMOTO_
 	_ADDREADME_
-	_ADDaddresolvconf_
+	_ADDresolvconf_
 	_ADDae_
 	_ADDbash_logout_
 	_ADDbash_profile_
@@ -23,16 +23,20 @@ _ADDADDS_() {
 	_ADDcdth_
 	_ADDcdtmp_
 	_ADDch_
+	_ADDchperms.cache+gnupg_
 	_ADDcsystemctl_
 	_ADDdfa_
 	_ADDexd_
-	_ADDfbindexample_
+	_ADDbindexample_
+	_ADDfbindprocpcidevices.prs_
+	_ADDfbindprocshmem.prs_
 	_ADDfbindprocuptime_
 	_ADDfbinds_
 	_ADDfibs_
 	_ADDga_
 	_ADDgcl_
 	_ADDgcm_
+	_ADDgitconfig_
 	_ADDgp_
 	_ADDgpl_
 	_ADDinputrc
@@ -44,11 +48,13 @@ _ADDADDS_() {
 	_ADDpci_
 	_ADDprofile_
 	_ADDt_
+	_ADDtools_
 	_ADDtour_
 	_ADDtrim_
 	_ADDv_
 	_ADDwe_
 	_ADDyt_
+	_DOMODdotfiles_
 }
 
 _CALLSYSTEM_() {
@@ -162,79 +168,75 @@ _MAINBLOCK_() {
 	_DETECTSYSTEM_
 	_WAKEUNLOCK_
 	_PRINTFOOTER_
-	set +Eeuo pipefail
 	"$INSTALLDIR/$STARTBIN" || _PRINTPROOTERROR_
-	set -Eeuo pipefail
 	_PRINTFOOTER2_
 	_PRINTSTARTBIN_USAGE_
+	exit
 }
 
 _DOPROXY_() {
-	if [[ -e "$HOME"/.bash_profile ]]
-	then
-		grep "proxy" "$HOME"/.bash_profile | grep "export" >> root/bin/"$BINFNSTP" 2>/dev/null ||:
-	fi
-	if [[ -e "$HOME"/.bashrc ]]
-	then
-		grep "proxy" "$HOME"/.bashrc  | grep "export" >> root/bin/"$BINFNSTP" 2>/dev/null ||:
-	fi
-	if [[ -e "$HOME"/.profile ]]
-	then
-		grep "proxy" "$HOME"/.profile | grep "export" >> root/bin/"$BINFNSTP" 2>/dev/null ||:
-	fi
-}
-
-_DOKEYS_() {
-	if [[ "$CPUABI" = "$CPUABIX86" ]]
-	then
-		printf "./root/bin/keys x86\\n" >> root/bin/"$BINFNSTP"
-	elif [[ "$CPUABI" = "$CPUABIX86_64" ]]
-	then
-		printf "./root/bin/keys x86_64\\n" >> root/bin/"$BINFNSTP"
-	else
- 		printf "./root/bin/keys\\n" >> root/bin/"$BINFNSTP"
-	fi
+	[[ -f "$HOME"/.bash_profile ]] && grep "proxy" "$HOME"/.bash_profile | grep "export" >> root/bin/"$BINFNSTP" 2>/dev/null ||:
+	[[ -f "$HOME"/.bashrc ]] && grep "proxy" "$HOME"/.bashrc  | grep "export" >> root/bin/"$BINFNSTP" 2>/dev/null ||:
+	[[ -f "$HOME"/.profile ]] && grep "proxy" "$HOME"/.profile | grep "export" >> root/bin/"$BINFNSTP" 2>/dev/null ||:
 }
 
 _MAKEFINISHSETUP_() {
-	_CFLHDR_ root/bin/"$BINFNSTP"
-	[[ "${LCR:-}" -ne 1 ]] && LOCGEN="" 
-	[[ "${LCR:-}" -ne 2 ]] && LOCGEN=""
-	[[ -z "${LCR:-}" ]] && LOCGEN="printf \"\\e[1;32m%s\\e[0;32m\"  \"==> \" && locale-gen  ||:"
-	cat >> root/bin/"$BINFNSTP" <<- EOM
-	_PMFSESTRING_() { 
-	printf "\\e[1;31m%s\\e[1;37m%s\\e[1;32m%s\\e[1;37m%s\\n\\n" "Signal generated in '\$1' : Cannot complete task : " "Continuing...   To correct the error run " "setupTermuxArch refresh" " to attempt to finish the autoconfiguration."
-	printf "\\e[1;34m%s\\e[0;34m%s\\e[1;34m%s\\e[0;34m%s\\e[1;34m%s\\n\\n" "  If you find improvements for " "setupTermuxArch" " and " "\$0" " please open an issue and accompanying pull request."
+	_CFLHDR_ "root/bin/$BINFNSTP"
+	_DOKEYS_() {
+		if [[ "$CPUABI" = "$CPUABIX86" ]]
+		then 
+			printf "/root/bin/keys x86\\n" >> root/bin/"$BINFNSTP"
+		elif [[ "$CPUABI" = "$CPUABIX86_64" ]]
+		then
+			 printf "/root/bin/keys x86_64\\n" >> root/bin/"$BINFNSTP" 
+		else
+			printf "/root/bin/keys\\n" >> root/bin/"$BINFNSTP"
+		fi
 	}
-	printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n" "To generate locales in a preferred language use " "Settings > Language & Keyboard > Language " "in Android; Then run " "${0##*/} refresh" " for a full system refresh including locale generation; For quick refresh you can use " "${0##*/} r" ".  For a refresh with user directories " "${0##*/} re" " can be used."
-   	$LOCGEN
-	printf "\\n\\e[1;34m:: \\e[1;37m%s\\n" "Processing system for $NASVER $CPUABI, and removing redundant packages for Termux PRoot installation..."
+	_DOPROXY_
+	[[ "${LCR:-}" -ne 1 ]] && LOCGEN=""
+	[[ "${LCR:-}" -ne 2 ]] && LOCGEN=""
+	[[ -z "${LCR:-}" ]] && LOCGEN="printf \"\\e[1;32m%s\\e[0;32m\"  \"==> \" 
+	if locale-gen 
+	then
+		:
+	else
+		_DOKEYS_
+		pacman -Sy grep gzip sed sudo --noconfirm --color=always 
+		locale-gen 
+	fi"
+	cat >> root/bin/"$BINFNSTP" <<- EOM
+	_PMFSESTRING_() {
+	printf "\\e[1;31m%s\\e[1;37m%s\\e[1;32m%s\\e[1;37m%s\\n\\n" "Signal generated in '\$1' : Cannot complete task : " "Continuing...   To correct the error run " "setupTermuxArch refresh" " to attempt to finish the autoconfiguration."
+	printf "\\e[1;34m%s\\e[0;34m%s\\e[1;34m%s\\e[0;34m%s\\e[1;34m%s\\n\\n" "  If you find better resolves for " "setupTermuxArch" " and " "\$0" ", please open an issue and accompanying pull request."
+	}
+	printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n" "To generate locales in a preferred language use " "Settings > Language & Keyboard > Language " "in Android; Then run " "${0##*/} refresh" " for a full system refresh including locale generation; For a quick refresh you can use " "${0##*/} r" ".  For a refresh with user directories " "${0##*/} re" " can be used."
+	printf "\\n\\e[1;34m:: \\e[1;32m%s\\n" "Processing system for $NASVER $CPUABI, and removing redundant packages for Termux PRoot installation if necessary..."
 	EOM
-	_FIXOWNER_
 	if [[ -z "${LCR:-}" ]] # is undefined
 	then
 		printf "%s\\n" "pacman -Syy || pacman -Syy || _PMFSESTRING_ \"pacman -Syy $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
-		printf "%s\\n" "/root/bin/keys || _PMFSESTRING_ \"keys $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+		_DOKEYS_
 	 	if [[ "$CPUABI" = "$CPUABI5" ]]
 		then
-	 		printf "%s\\n" "pacman -Rc linux-armv5 linux-firmware --noconfirm --color=always 2>/dev/null || _PMFSESTRING_ \"pacman -Rc linux-armv5 linux-firmware $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+	 		printf "%s\\n" "pacman -Rc linux-armv5 linux-firmware --noconfirm --color=always || _PMFSESTRING_ \"pacman -Rc linux-armv5 linux-firmware $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 	 	elif [[ "$CPUABI" = "$CPUABI7" ]]
 		then
-	 		printf "%s\\n" "pacman -Rc linux-armv7 linux-firmware --noconfirm --color=always 2>/dev/null || _PMFSESTRING_ \"pacman -Rc linux-armv7 linux-firmware $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+	 		printf "%s\\n" "pacman -Rc linux-armv7 linux-firmware --noconfirm --color=always || _PMFSESTRING_ \"pacman -Rc linux-armv7 linux-firmware $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 	 	elif [[ "$CPUABI" = "$CPUABI8" ]]
 		then
-	 		printf "%s\\n" "pacman -Rc linux-aarch64 linux-firmware --noconfirm --color=always 2>/dev/null || _PMFSESTRING_ \"pacman -Rc linux-aarch64 linux-firmware $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+	 		printf "%s\\n" "pacman -Rc linux-aarch64 linux-firmware --noconfirm --color=always || _PMFSESTRING_ \"pacman -Rc linux-aarch64 linux-firmware $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 	 	fi
 		if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX86_64" ]]
 		then
-			printf "%s\\n" "pacman -Syu gzip patch python3 sed sudo unzip --noconfirm --color=always 2>/dev/null || _PMFSESTRING_ \"pacman -Syu gzip patch sed sudo unzip $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+			printf "%s\\n" "pacman -Syu grep gzip patch sed sudo unzip --noconfirm --color=always || pacman -Syu gzip patch sed sudo unzip --noconfirm --color=always || _PMFSESTRING_ \"pacman -Syu gzip patch sed sudo unzip $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 		else
-			printf "%s\\n" "pacman -Syu patch python3 sudo unzip --noconfirm --color=always 2>/dev/null || _PMFSESTRING_ \"pacman -Syu patch sudo unzip $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+			printf "%s\\n" "pacman -Syu patch sudo unzip --noconfirm --color=always || pacman -Syu patch sudo unzip --noconfirm --color=always || _PMFSESTRING_ \"pacman -Syu patch sudo unzip $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 		fi
- 		printf "%s\\n" "/root/bin/csystemctl || _PMFSESTRING_ \"csystemctl $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
- 		printf "%s\\n" "/root/bin/addauser user || _PMFSESTRING_ \"addauser user$BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+ 		printf "%s\\n" "/root/bin/addauser user || _PMFSESTRING_ \"addauser user $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 	fi
 	cat >> root/bin/"$BINFNSTP" <<- EOM
+   	$LOCGEN
 	printf "\\n\\e[1;34m%s  \\e[0m" "🕛 > 🕤 Arch Linux in Termux is installed and configured 📲  "
 	printf "\\e]2;%s\\007" " 🕛 > 🕤 Arch Linux in Termux is installed and configured 📲"
 	EOM
@@ -245,6 +247,7 @@ _MAKESETUPBIN_() {
 	_CFLHDR_ root/bin/setupbin.bash
 	cat >> root/bin/setupbin.bash <<- EOM
 	set +Eeuo pipefail
+	umask 0022
 	EOM
 	printf "%s\\n" "$PROOTSTMNT /root/bin/$BINFNSTP ||:" >> root/bin/setupbin.bash
 	cat >> root/bin/setupbin.bash <<- EOM
@@ -264,7 +267,7 @@ _MAKESTARTBIN_() {
 		exit 202
 	fi
 	declare -g AR2AR="\${@:2}"
-	declare -g ar3ar="\${@:3}"
+	declare -g AR3AR="\${@:3}"
 	_PRINTUSAGE_() {
 	printf "\\e]2;%s\\007" "TermuxArch $STARTBIN help 📲"
 	printf "\\n\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN" "  start Arch Linux as root.  This account is reserved for system administration."
@@ -273,11 +276,11 @@ _MAKESTARTBIN_() {
 	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN r[aw]" "  construct the " "$STARTBIN " "proot statement from exec.../bin/.  For example " "$STARTBIN r su " "will exec su in Arch Linux."
 	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n\\e[0m" "$STARTBIN s[u] user command" "  login as user and execute command.  Use " "$STARTBIN c addauser user " "first to create this user and user's home directory."
 	}
-
 	# [] Default Arch Linux in Termux PRoot root login.
 	if [[ -z "\${1:-}" ]]
 	then
 		set +Eeuo pipefail
+		umask 0022
 	EOM
 		printf "%s\\n" "$PROOTSTMNT /bin/bash -l ||: " >> "$STARTBIN"
 	cat >> "$STARTBIN" <<- EOM
@@ -293,19 +296,33 @@ _MAKESTARTBIN_() {
 		printf '\033]2; $STARTBIN command 📲  \007'
 		touch $INSTALLDIR/root/.chushlogin
 		set +Eeuo pipefail
+		umask 0022
 	EOM
 		printf "%s\\n" "$PROOTSTMNT /bin/bash -lc \"\$AR2AR\" ||:" >> "$STARTBIN"
 	cat >> "$STARTBIN" <<- EOM
 		set -Eeuo pipefail
 		printf '\033]2; $STARTBIN command 📲  \007'
 		rm -f $INSTALLDIR/root/.chushlogin
-	# [login user|login user [options]] Login as user [plus options].  Use 'addauser user' first to create this user and user's home directory.
+	# [l[ogin] user|u[ser] user [options]] Login as user [plus options].  Use 'addauser user' first to create this user and the user's home directory.  This option is for installing and working with programs that build other programs, and for working with the 'git' command, but the 'git’ might not work as expected in all situations.
 	elif [[ "\${1//-}" = [Ll]* ]] || [[ "\${1//-}" = [Uu]* ]]
 	then
 		printf '\033]2; $STARTBIN login user [options] 📲  \007'
 		set +Eeuo pipefail
+		umask 0022
 	EOM
-		printf "%s\\n" "$PROOTSTMNT /bin/su - \"\$AR2AR\" ||:" >> "$STARTBIN"
+		printf "%s\\n" "$PROOTSTMNTUU /bin/su - \"\$AR2AR\" ||:" >> "$STARTBIN"
+	cat >> "$STARTBIN" <<- EOM
+		set -Eeuo pipefail
+		printf '\033]2; $STARTBIN command 📲  \007'
+		rm -f $INSTALLDIR/root/.chushlogin
+	# [el[ogin] user|eu[ser] user [options]] Login as user [plus options].  Use 'addauser user' first to create this user and the user's home directory.  This option is for working with programs that have already been installed, and for working with the 'git' command.
+	elif [[ "\${1//-}" = e[Ll]* ]] || [[ "\${1//-}" = e[Uu]* ]]
+	then
+		printf '\033]2; $STARTBIN login user [options] 📲  \007'
+		set +Eeuo pipefail
+		umask 0022
+	EOM
+		printf "%s\\n" "$PROOTSTMNTU /bin/su - \"\$AR2AR\" ||:" >> "$STARTBIN"
 	cat >> "$STARTBIN" <<- EOM
 		set -Eeuo pipefail
 		printf '\033]2; $STARTBIN login user [options] 📲  \007'
@@ -314,6 +331,7 @@ _MAKESTARTBIN_() {
 	then
 		printf '\033]2; $STARTBIN raw ARGS 📲  \007'
 		set +Eeuo pipefail
+		umask 0022
 	EOM
 		printf "%s\\n" "$PROOTSTMNT /bin/\"\$AR2AR\" ||:" >> "$STARTBIN"
 	cat >> "$STARTBIN" <<- EOM
@@ -330,8 +348,9 @@ _MAKESTARTBIN_() {
 			touch $INSTALLDIR/home/"\$2"/.chushlogin
 		fi
 		set +Eeuo pipefail
+		umask 0022
 	EOM
-		printf "%s\\n" "$PROOTSTMNT /bin/su - \"\$2\" -c \"\$ar3ar\" ||:" >> "$STARTBIN"
+		printf "%s\\n" "$PROOTSTMNTU /bin/su - \"\$2\" -c \"\$AR3AR\" ||:" >> "$STARTBIN"
 	cat >> "$STARTBIN" <<- EOM
 		set -Eeuo pipefail
 		printf '\033]2; $STARTBIN su user command 📲  \007'
@@ -374,51 +393,53 @@ _MD5CHECK_() {
 }
 
 _PREPROOTDIR_() {
-	[[ ! -d etc ]] && mkdir -p etc
-	[[ ! -d home ]] && mkdir -p home
-	[[ ! -d root/bin ]] && mkdir -p root/bin
-	[[ ! -d usr/bin ]] && mkdir -p usr/bin
-	[[ ! -d var/backups/"${INSTALLDIR##*/}/root" ]] && mkdir -p var/backups/"${INSTALLDIR##*/}/root"
-	[[ ! -d var/binds ]] && mkdir -p var/binds
+	# create local array of directories to be created for setupTermuxArch
+	local DRARRLST=("etc" "home" "root/bin" "usr/bin" "usr/local/bin" "var/backups/${INSTALLDIR##*/}/etc" "var/backups/${INSTALLDIR##*/}/root" "var/binds")
+	for ISDIR in ${DRARRLST[@]}
+	do
+		[[ ! -d "$ISDIR" ]] && printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[0m\\n" "Creating directory " "'/$ISDIR'" "." && mkdir -p "$ISDIR" || printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[0m\\n" "Directory " "'/$ISDIR'" " exists; Continuing:"
+	done
 }
 
 _PREPINSTALLDIR_() {
 	cd "$INSTALLDIR"
-	_PREPROOTDIR_ || _PSGI1ESTRING_ "_PREPROOTDIR_ _PREPINSTALLDIR_ necessaryfunctions.bash ${0##*/}"
+	_PREPROOTDIR_
 	_SETLANGUAGE_
 	_ADDADDS_
-	_DOPROXY_
 	_MAKEFINISHSETUP_
 	_MAKESETUPBIN_
 	_MAKESTARTBIN_
+	_FIXOWNER_
+  	[[ $ELCR == 0 ]] && exit ||: # _PSGI1ESTRING_ "_PREPINSTALLDIR_ necessaryfunctions.bash ${0##*/}"	##  Create ~/TermuxArchBloom directory and Arch Linux in Termux PRoot root directory skeleton.  Commands 'setupTermuxArch b[l[oom]]' can be used to access these features.  These options do NOT install the complete root file system.
 }
 
 _PREPROOT_() {
 	if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX86_64" ]]
 	then
- 		proot --link2symlink -0 bsdtar -xpf "$IFILE" --strip-components 1
+ 		proot --link2symlink -0 bsdtar -x -p -f "$IFILE" --strip-components 1
 	else
- 		proot --link2symlink -0 bsdtar -xpf "$IFILE"
+ 		proot --link2symlink -0 bsdtar -x -p -f "$IFILE"
 	fi
 }
 
 _RUNFINISHSETUP_() {
+	cp  "$INSTALLDIR/etc/pacman.d/mirrorlist" "$INSTALLDIR/var/backups/${INSTALLDIR##*/}/etc/mirrorlist.$SDATE.bkp"
 	_SEDUNCOM_() {
-			sed -i "/\/mirror.archlinuxarm.org/ s/^# *//" "$INSTALLDIR"/etc/pacman.d/mirrorlist || _PSGI1ESTRING_ "sed -i _SEDUNCOM_ necessaryfunctions.bash ${0##*/}" # sed replace a character in a matched line in place
+			sed -i "/\/mirror.archlinuxarm.org/ s/^# *//" "$INSTALLDIR/etc/pacman.d/mirrorlist" || _PSGI1ESTRING_ "sed -i _SEDUNCOM_ necessaryfunctions.bash ${0##*/}" # sed replace a character in a matched line in place
 	}
 	printf "\\e[0m"
 	if [[ "$FSTND" ]]
 	then
 		NMIR="$(awk -F'/' '{print $3}' <<< "$NLCMIRROR")"
-		sed -i '/http\:\/\/mir/ s/^#*/# /' "$INSTALLDIR"/etc/pacman.d/mirrorlist
+		sed -i '/http\:\/\/mir/ s/^#*/# /' "$INSTALLDIR/etc/pacman.d/mirrorlist"
 		# test if NMIR is in mirrorlist file
-		if grep "$NMIR" "$INSTALLDIR"/etc/pacman.d/mirrorlist
+		if grep "$NMIR" "$INSTALLDIR/etc/pacman.d/mirrorlist"
 		then
 			printf "%s\\n" "Found server $NMIR in /etc/pacman.d/mirrorlist; Uncommenting $NMIR."
-			sed -i "/$NMIR/ s/^# *//" "$INSTALLDIR"/etc/pacman.d/mirrorlist  || _SEDUNCOM_ || _PSGI1ESTRING_ "sed -i _RUNFINISHSETUP_ necessaryfunctions.bash ${0##*/}"
+			sed -i "/$NMIR/ s/^# *//" "$INSTALLDIR/etc/pacman.d/mirrorlist"  || _SEDUNCOM_ || _PSGI1ESTRING_ "sed -i _RUNFINISHSETUP_ necessaryfunctions.bash ${0##*/}"
 		else
 			printf "%s\\n" "Did not find server $NMIR in /etc/pacman.d/mirrorlist; Adding $NMIR to file /etc/pacman.d/mirrorlist."
-			printf "%s\\n" "Server = $NLCMIRROR/\$arch/\$repo" >> "$INSTALLDIR"/etc/pacman.d/mirrorlist
+			printf "%s\\n" "Server = $NLCMIRROR/\$arch/\$repo" >> "$INSTALLDIR/etc/pacman.d/mirrorlist"
 		fi
 	else
 		if [[ "$ed" = "" ]]
@@ -429,12 +450,12 @@ _RUNFINISHSETUP_() {
 		then
 			_EDITFILES_
 		fi
-		"$ed" "$INSTALLDIR"/etc/pacman.d/mirrorlist
+		"$ed" "$INSTALLDIR/etc/pacman.d/mirrorlist"
 	fi
-	"$INSTALLDIR"/root/bin/setupbin.bash || _PRINTPROOTERROR_
+	"$INSTALLDIR/root/bin/setupbin.bash" || _PRINTPROOTERROR_
 }
 
-_SETLANGUAGE_() { # This function uses device system settings to set locale.  To generate locales in a preferred language, you can use "Settings > Language & Keyboard > Language" in Android; Then run 'setupTermuxArch r for a quick system refresh.
+_SETLANGUAGE_() { # This function uses device system settings to set locale.  To generate locales in a preferred language, you can use "Settings > Language & Keyboard > Language" in Android; Then run 'setupTermuxArch r' for a quick system refresh to regenerate locales in your preferred language.
 	ULANGUAGE="unkown"
   	LANGIN=([0]="$(getprop user.language)")
 	LANGIN+=([1]="$(getprop user.region)")
@@ -478,7 +499,7 @@ _SETLANGUAGE_() { # This function uses device system settings to set locale.  To
 	then
    		ULANGUAGE="en_US"
  	fi
-	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n" "Setting locales to: " "Language " ">> $ULANGUAGE << " "Region"
+	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\n" "Setting locales to: " "Language " ">> $ULANGUAGE << " "Region" ": Please wait a moment."
 }
 
 _SETLOCALE_() { # This function uses device system settings to set locale.  To generate locales in a preferred language you can use "Settings > Language & Keyboard > Language" in Android; Then run 'setupTermuxArch r' for a quick system refresh.

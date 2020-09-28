@@ -3,7 +3,7 @@
 # Hosted sdrausty.github.io/TermuxArch courtesy https://pages.github.com
 # https://sdrausty.github.io/TermuxArch/README has info about this project.
 # https://sdrausty.github.io/TermuxArch/CONTRIBUTORS Thank you for your help.
-# Printout statement subroutines for `setupTermuxArch.bash`.
+# Printout statement subroutines for `setupTermuxArch`.
 ################################################################################
 FLHDR0[0]="#!/usr/bin/env bash"
 FLHDR0[1]="# Copyright 2017-2020 by SDRausty. All rights reserved, see LICENSE 🌎 🌍 🌏"
@@ -15,13 +15,13 @@ FLHDR1[1]="# IFS=$'\\n\\t'"
 FLHDR1[2]="set -Eeuo pipefail"
 FLHDR1[3]="shopt -s nullglob globstar"
 FLHDR1[4]="unset LD_PRELOAD"
-FLHDR1[5]="VERSIONID=2.0.166"
+FLHDR1[5]="VERSIONID=2.0.255"
 FLHDR1[6]=" "
 FLHDRP[0]="## BEGIN #####################################################################"
 FLHDRP[1]=""
 TRPERROR[0]="_TRPERR_() {  # run on script error"
 TRPERROR[1]="	local RV=\"\$?\""
-TRPERROR[2]="	printf \"\\e[?25h\\n\\e[1;48;5;138m %s\\e[0m\\n\\n\" \"TermuxArch WARNING:  Generated script signal \${RV:-unknown} near or at line number \${1:-unknown} by \`\${2:-command}\`!\""
+TRPERROR[2]="	printf \"\\\\e[?25h\\\\n\\\\e[1;48;5;138m %s\\\\e[0m\\\\n\\\\n\" \"TermuxArch WARNING:  Generated script signal \${RV:-unknown} near or at line number \${1:-unknown} by \`\${2:-command}\`!\""
 TRPERROR[3]="	exit 201"
 TRPERROR[4]="}"
 TRPERROR[5]=" "
@@ -31,10 +31,10 @@ TRPEXIT[2]="  	printf \"\" "
 TRPEXIT[3]="	 "
 TRPEXIT[4]="	if [[ \"\$RV\" = 0 ]]"
 TRPEXIT[5]="	then"
-TRPEXIT[6]="		printf \"\\e[0;32m%s\\e[1;34m: \\e[1;32m%s\\e[0m\\n\\e[0m\" \"\${0##*/} \$@ $VERSIONID\" \"DONE 🏁 \""
-TRPEXIT[7]="		printf \"\\e]2; %s: %s \007\" \"\${0##*/} \$@\" \"DONE 🏁 \""
+TRPEXIT[6]="		printf \"\\\\e[0;32m%s\\\\e[1;34m: \\\\e[1;32m%s\\\\e[0m\\\\n\\\\e[0m\" \"\${0##*/} \$@ $VERSIONID\" \"DONE 🏁 \""
+TRPEXIT[7]="		printf \"\\\\e]2; %s: %s \007\" \"\${0##*/} \$@\" \"DONE 🏁 \""
 TRPEXIT[8]="	else "
-TRPEXIT[9]="		printf \"\\e[0;32m%s \\e[0m%s\\e[1;34m: \\e[1;32m%s\\e[0m\\n\\e[0m\" \"\${0##*/} \$@ $VERSIONID\" \"[Exit Signal \$RV]\" \"DONE  🏁 \""
+TRPEXIT[9]="		printf \"\\\\e[0;32m%s \\\\e[0m%s\\\\e[1;34m: \\\\e[1;32m%s\\\\e[0m\\\\n\\\\e[0m\" \"\${0##*/} \$@ $VERSIONID\" \"[Exit Signal \$RV]\" \"DONE  🏁 \""
 TRPEXIT[10]="		printf \"\033]2; %s: %s %s \007\" \"\${0##*/} \$@\" \"[Exit Signal \$RV]\" \"DONE 🏁 \""
 TRPEXIT[11]="	fi"
 TRPEXIT[12]="	printf \"\\e[?25h\\e[0m\""
@@ -43,12 +43,12 @@ TRPEXIT[14]="	exit"
 TRPEXIT[15]="}"
 TRPEXIT[16]=" "
 TRPSIGNAL[0]="_TRPSIG_() {  # run on signal"
-TRPSIGNAL[1]="	printf \"\\e[?25h\\e[1;7;38;5;0mTermuxArch WARNING:  Signal \$? received!\\e[0m\\n\""
+TRPSIGNAL[1]="	printf \"\\\\e[?25h\\\\e[1;7;38;5;0mTermuxArch WARNING:  Signal \$? received!\\\\e[0m\\\\n\""
 TRPSIGNAL[2]=" 	exit 211"
 TRPSIGNAL[3]="}"
 TRPSIGNAL[4]=" "
 TRPQUIT[0]="_TRPQ_() {  # run on quit"
-TRPQUIT[1]="	printf \"\\e[?25h\\e[1;7;38;5;0mTermuxArch WARNING:  Quit signal \$? received!\\e[0m\\n\""
+TRPQUIT[1]="	printf \"\\\\e[?25h\\\\e[1;7;38;5;0mTermuxArch WARNING:  Quit signal \$? received!\\\\e[0m\\\\n\""
 TRPQUIT[2]=" 	exit 221"
 TRPQUIT[3]="}"
 TRPQUIT[4]=" "
@@ -197,7 +197,7 @@ _PRINTMISMATCH_() {
 }
 
 _PRINTFOOTER_() {
-	printf "\033]2;%s\007" "Thank you for using \`${0##*/}\` to install Arch Linux in Termux 📲 "
+	printf "\033]2;%s\007" "Thank you for using \`${0##*/}\` to install Arch Linux in Termux PRoot 📲 "
 	printf "\\e[0;34m 🕛 > 🕥 \\e[1;34mUse \\e[1;32m$STARTBIN \\e[1;34mto launch Arch Linux in Termux PRoot.  Alternatively, you can run \\e[1;32m~$PRINTROOTDIR/$STARTBIN \\e[1;34min a BASH shell to start Arch Linux in Termux PRoot for future sessions.  See \\e[1;32m$STARTBIN help \\e[1;34mfor usage information.\\e[0m\\n\\n"
 	_COPYSTARTBIN2PATH_
 	printf "\\e[0;32m 🕛 = 🕛 \\e[1;34mInformation about \\e[0;36m\"Starting Arch Linux from Termux?\"\\e[1;34m at \\e[1;34mhttps://github.com/sdrausty/TermuxArch/issues/25\\e[1;34m.  Use \\e[1;32mtour\\e[1;34m to run a very short tour to get to know the new Arch Linux in Termux PRoot environment you just set up a little bit better.  If there was more than one error during the update procedure and you would like to refresh the installation, use \\e[1;32m${0##*/} refresh\\e[1;34m.  This will update and recreate the configuration provided.  The TermuxArch command \\e[1;32mkeys \\e[1;34mhelps install and generate Arch Linux keyring keys.\\n\\n"
@@ -210,18 +210,12 @@ _PRINTFOOTER2_() {
 }
 
 _PRINTPROOTERROR_() {
-	printf "\\e[0;34m%s\\n\\n%s\\n\\n%s\\n\\n%s\\e[0m" "If error \` env ... not found \` is found, ensure that all the software is up to date.  After updating, reference these links in order to find a resolution if updating Termux app and Termux packages was unsuccessful:" "  * https://github.com/termux/proot/issues?q=\"env\"+\"not+found\"" "  * https://github.com/termux/termux-packages/issues?q=\"not+found\"+\"proot\""
+	printf "\\e[0;34m%s\\n\\n%s\\n\\n%s\\n\\n%s\\e[0m" "If error \` env ... not found \` is found, ensure that all the software is up to date.  After updating, please reference these links in order to find a resolution if updating Termux app and Termux packages was unsuccessful:" "  * https://github.com/termux/proot/issues?q=\"env\"+\"not+found\"" "  * https://github.com/termux/termux-packages/issues?q=\"not+found\"+\"proot\""
 }
 
 _PRINTROOTDIRFUNCTION_() {
 	declare -g PRINTROOTDIR
-	PRINTROOTDIR="$(printf "%s" "${ROOTDIR%/}" | sed 's#//*#/#g')"
+	PRINTROOTDIR="$(printf "%s" "${ROOTDIR%/}"|sed 's#//*#/#g')"
 }
 _PRINTROOTDIRFUNCTION_
-
-
-_PSGI1ESTRING_() {
-	printf "\\e[1;31m%s\\e[1;37m%s\\e[1;31m%s\\e[1;37m%s\\n\\n\\e[0m" "Signal generated in '$1' : cannot complete '$1' : continuing...   Running " "bash ${0##*/} refresh" " will attempt to complete the autoconfiguration and installation." "  If you find improvements for '${0##*/}' please open an issue and accompanying pull request." 
-}
-# _PSGI1ESTRING_ "test string" && exit # print signal generated with arg 1 format
 # printoutstatements.bash EOF
