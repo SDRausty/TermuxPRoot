@@ -229,9 +229,9 @@ _MAKEFINISHSETUP_() {
 	 	fi
 		if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX86_64" ]]
 		then
-			printf "%s\\n" "pacman -Syu grep gzip patch sed sudo unzip --noconfirm --color=always || pacman -Syu gzip patch sed sudo unzip --noconfirm --color=always || _PMFSESTRING_ \"pacman -Syu gzip patch sed sudo unzip $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+			printf "%s\\n" "pacman -Su grep gzip patch sed sudo unzip --noconfirm --color=always || pacman -Su gzip patch sed sudo unzip --noconfirm --color=always || _PMFSESTRING_ \"pacman -Su gzip patch sed sudo unzip $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 		else
-			printf "%s\\n" "pacman -Syu patch sudo unzip --noconfirm --color=always || pacman -Syu patch sudo unzip --noconfirm --color=always || _PMFSESTRING_ \"pacman -Syu patch sudo unzip $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+			printf "%s\\n" "pacman -Su patch sudo unzip --noconfirm --color=always || pacman -Su patch sudo unzip --noconfirm --color=always || _PMFSESTRING_ \"pacman -Su patch sudo unzip $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 		fi
  		printf "%s\\n" "/root/bin/addauser user || _PMFSESTRING_ \"addauser user $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 	fi
@@ -272,7 +272,8 @@ _MAKESTARTBIN_() {
 	printf "\\e]2;%s\\007" "TermuxArch $STARTBIN help 📲"
 	printf "\\n\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN" "  start Arch Linux as root.  This account is reserved for system administration."
 	printf "\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN c[ommand] command" "  run Arch Linux command from Termux as root user."
-	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN u[ser]|l[ogin] user" "  login as user.  Use " "$STARTBIN c addauser user " "first to create this user and user's home directory."
+	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN l[ogin]|u[ser] user" "  login as user.  This option is preferred when installing software and using the command 'makeyay'."
+	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN el[ogin]|eu[ser] user" "  use alternate elogin or euser option to login as user.  This option is preferred when using the command 'git' in shared storage."
 	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN r[aw]" "  construct the " "$STARTBIN " "proot statement from exec.../bin/.  For example " "$STARTBIN r su " "will exec su in Arch Linux."
 	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n\\e[0m" "$STARTBIN s[u] user command" "  login as user and execute command.  Use " "$STARTBIN c addauser user " "first to create this user and user's home directory."
 	}
