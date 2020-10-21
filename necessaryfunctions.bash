@@ -61,11 +61,11 @@ _CALLSYSTEM_() {
 	declare COUNTER=""
 	if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX86_64" ]]
 	then
-		_GETIMAGE_
+		_GETIMAGE_ || _PSGI1ESTRING_ "_GETIMAGE_ _CALLSYSTEM_ necessaryfunctions.bash ${0##}"
 	else
 		if [[ "$CMIRROR" = "os.archlinuxarm.org" ]] || [[ "$CMIRROR" = "mirror.archlinuxarm.org" ]]
 		then
-			until _FTCHSTND_ || FRV="$?" && [[ -z "${FRV:-}" ]] && break || ([[ $FRV = 3 ]] || [[ $FRV = 22 ]]) && _PSGI1ESTRING_ "FRV=$FRV until _FTCHSTND_ necessaryfunctions.bash ${0##}" && break
+			until _FTCHSTND_ || _PSGI1ESTRING_ "until _FTCHSTND_ necessaryfunctions.bash ${0##}" && break
 			do
 				_FTCHSTND_
 				sleep 2
@@ -424,7 +424,12 @@ _PREPROOT_() {
 }
 
 _RUNFINISHSETUP_() {
-	cp  "$INSTALLDIR/etc/pacman.d/mirrorlist" "$INSTALLDIR/var/backups/${INSTALLDIR##*/}/etc/mirrorlist.$SDATE.bkp"
+	_ADDresolvconf_
+	cp "$INSTALLDIR/etc/pacman.d/mirrorlist" "$INSTALLDIR/var/backups/${INSTALLDIR##*/}/etc/mirrorlist.$SDATE.bkp" || _PSGI1ESTRING_ "cp _RUNFINISHSETUP_ necessaryfunctions.bash ${0##*/}"
+	if [[ "$CPUABI" = "$CPUABIX86" ]] 
+	then
+		curl https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirrorlist -o "$INSTALLDIR/etc/pacman.d/mirrorlist"
+	fi
 	_SEDUNCOM_() {
 			sed -i "/\/mirror.archlinuxarm.org/ s/^# *//" "$INSTALLDIR/etc/pacman.d/mirrorlist" || _PSGI1ESTRING_ "sed -i _SEDUNCOM_ necessaryfunctions.bash ${0##*/}" # sed replace a character in a matched line in place
 	}

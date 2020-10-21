@@ -284,8 +284,8 @@ _ADDcsystemctl_() {
 	printf "\\\\e[38;5;148m%s\\\\n\\\\e[0m" "Moved /usr/bin/systemctl to $INSTALLDIR/var/backups/${INSTALLDIR##*/}/systemctl.\$SDATE.bkp"
 	printf "%s\\\\n" "Getting replacement systemctl from https://raw.githubusercontent.com/TermuxArch/docker-systemctl-replacement/master/files/docker/systemctl3.py"
 	# Arch Linux package 'systemctl' updates will mot halt functioning as /usr/local/bin precedes /usr/bin in the PATH
-	# downlaodvand copy to both /usr/local/bin and /usr/bin
-	curl --fail --retry 2 https://raw.githubusercontent.com/TermuxArch/docker-systemctl-replacement/master/files/docker/systemctl3.py|tee /usr/bin/systemctl /usr/local/bin/systemctl >/dev/null
+	# download and copy to both directories /usr/local/bin and /usr/bin
+	curl --fail --retry 2 https://raw.githubusercontent.com/TermuxArch/docker-systemctl-replacement/master/files/docker/systemctl3.py | tee /usr/bin/systemctl /usr/local/bin/systemctl >/dev/null
 	chmod 700 /usr/bin/systemctl /usr/local/bin/systemctl
 	[ ! -e /run/lock ] && mkdir -p /run/lock
 	touch /var/lock/csystemctl.lock
@@ -727,9 +727,13 @@ _ADDmakeyay_() {
 _ADDpatchmakepkg_() {
 	_CFLHDR_ root/bin/patchmakepkg "# patch makepkg"
 	cat >> root/bin/patchmakepkg <<- EOM
+	printf "%s\\\\n" "Attempting to patch makepkg: "
 	SDATE="\$(date +%s)"
 	BKPDIR="$INSTALLDIR/var/backups/${INSTALLDIR##*/}/makepkg.\$SDATE.bkp"
-	printf "%s\\\\n" "Attempting to patch makepkg: "
+	if [[ ! "\$(command -v patch)" ]] 2>/dev/null || [[ ! "\$(command -v unzip)" ]] 2>/dev/null
+	then
+		pci patch unzip
+	fi
 	[ -f /var/lock/patchmakepkg.lock ] && printf "%s\\\\n" "Already patched makepkg: DONE 🏁" && exit
 	mkdir -p "\$BKPDIR"
 	cp /bin/makepkg "\$BKPDIR"
@@ -863,7 +867,7 @@ _ADDthstartarch_() {
 }
 
 _ADDtools_() {	# developing implementaion : working system tools that work can be added to array PRFXTOLS
-[[ -z "${EDO01LCR:-}" ]] && PRFXTOLS=(getprop termux-change-repo termux-info) || [[ $EDO01LCR = 0 ]] && PRFXTOLS=(am dpkg getprop mkfifo termux-change-repo termux-info termux-open termux-open-url termux-wake-lock termux-wake-unlock)
+[[ -z "${EDO01LCR:-}" ]] && PRFXTOLS=(getprop termux-change-repo termux-info termux-open termux-open-url termux-wake-lock termux-wake-unlock termux-wake-lock termux-wake-unlock top) || [[ $EDO01LCR = 0 ]] && PRFXTOLS=(am dpkg getprop mkfifo termux-change-repo termux-info termux-open termux-open-url termux-wake-lock termux-wake-unlock top)
 #  	PRFXTOLS=(am getprop toolbox toybox)
  	for STOOL in ${PRFXTOLS[@]}
  	do
