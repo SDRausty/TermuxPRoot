@@ -473,14 +473,14 @@ _SETLANGUAGE_() { # This function uses device system settings to set locale.  To
 	LANGIN+=([7]="$(getprop ro.product.locale.region)")
 	touch "$INSTALLDIR"/etc/locale.gen
 	ULANGUAGE="${LANGIN[0]:-unknown}_${LANGIN[1]:-unknown}"
-	if ! grep -q "$ULANGUAGE" "$INSTALLDIR"/etc/locale.gen
+       	if ! grep -q "$ULANGUAGE" "$INSTALLDIR"/etc/locale.gen
 	then
 		ULANGUAGE="unknown"
        	fi
  	if [[ "$ULANGUAGE" != *_* ]]
 	then
  		ULANGUAGE="${LANGIN[3]:-unknown}_${LANGIN[2]:-unknown}"
-		if ! grep -q "$ULANGUAGE" "$INSTALLDIR"/etc/locale.gen
+ 	       	if ! grep -q "$ULANGUAGE" "$INSTALLDIR"/etc/locale.gen
 		then
  			ULANGUAGE="unknown"
  	       	fi
@@ -496,7 +496,7 @@ _SETLANGUAGE_() { # This function uses device system settings to set locale.  To
  	if [[ "$ULANGUAGE" != *_* ]]
 	then
  		ULANGUAGE="${LANGIN[6]:-unknown}_${LANGIN[7]:-unknown}"
-		if ! grep -q "$ULANGUAGE" "$INSTALLDIR"/etc/locale.gen
+ 	       	if ! grep -q "$ULANGUAGE" "$INSTALLDIR"/etc/locale.gen
 		then
  			ULANGUAGE="unknown"
  	       	fi
