@@ -17,7 +17,10 @@ _BLOOM_() { # Bloom = `setupTermuxArch manual verbose`
 }
 
 _EDITFILES_() {
-	if [[ "${ceds[$i]}" = "vi" ]]
+	if [[ -z "${ceds[$i]:-}" ]]
+	then
+		editor "${WDIR}setupTermuxArchConfigs.bash"
+	elif [[ "${ceds[$i]}" = "vi" ]]
 	then
 		sed -i -e 1,4d "$INSTALLDIR"/etc/pacman.d/mirrorlist
 		sed -i '1i# # # # # # # # # # # # # # # # # # # # # # # # # # #\n# TermuxArch vi instructions:	CTR+r is redo.\n# Use the hjkl keys to navigate. <h down j up k l>\n# Numbers are multipliers.  The u is undelete/undo.\n# 17j then i opens edit mode for the Geo-IP CMIRROR.\n# Enter the # hash/num/pounds symbol to comment it out: \n# Server = http://CMIRROR.archlinuxarm.org/$arch/$repo.\n# Long tap KEYBOARD in the side pane to see ESC, CTR...\n# Tap ESC to return to command mode in vi.\n# CTRL+d and CTRL+b to find your local CMIRROR.\n# / for search, N and n for next match.\n# Tap x to delete # to uncomment your local CMIRROR.\n# Choose only one CMIRROR.  Use :x to save your work.\n# Comment out the Geo-IP CMIRROR	end G	top gg\n# # # # # # # # # # # # # # # # # # # # # # # # # # #' "$INSTALLDIR"/etc/pacman.d/mirrorlist
@@ -180,20 +183,32 @@ _RMBLOOMQ_() {
 	fi
 }
 
-_TASPINNER_() {	# print spinner; based on https://github.com/vozdev/termux-setup
-	INTERVAL=1
-	SPINNERL="🌑🌒🌓🌔🌕🌖🌗🌘"
+_TASPINNER_() {	# print spinner; derivation based on https://github.com/ringohub/sh-spinner and https://github.com/vozdev/termux-setup
+	INCREMNT=1
+	if [[ -z "${1:-}" ]]
+	then
+	  	SPINNERL="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
+	elif [[ "${1//-}" = clock ]]
+	then
+		SPINNERL="🕛🕐🕑🕓🕔🕕🕖🕗🕘🕙🕚"
+	elif [[ "${1//-}" = moon ]]
+	then
+		SPINNERL="🌑🌒🌓🌔🌕🌖🌗🌘"
+	fi
 	SPINDLAY="0.$(shuf -i 1-4 -n 1)"
+	printf "\\e[?25l"
 	while :
 		do
-		printf "\b%s\b" "${SPINNERL:INTERVAL++%${#SPINNERL}:1}"
+		printf "  \b\b\b%s\b" "${SPINNERL:INCREMNT++%${#SPINNERL}:1}"
 		sleep $SPINDLAY
 	done
+	printf "\\e[?25h"
 }
 
 _TAMATRIX_() {	# print TermuxArch source code as matrix
-	printf "\\e[1;32m%s" "$(tr -d '\n' < $0)"
-	# split the string and print the split string
-	IFS=';' read -ra TAMATARR <<< "$(tr -d '\n' < $0)" && for EMSTRING in "${TAMATARR[@]}" ; do printf "\\e[0;32m%s" "$EMSTRING" ; sleep 0.0"$(shuf -i 0-999 -n 1)" ; done ; tail -n 8 "$0" ; printf "\\e[0m" ; exit
+	# Terminal codes VT100 \\e[?25l information at https://wiki.bash-hackers.org/scripting/terminalcodes website.
+	printf "\\e[?25l\\e[1;32m%s" "$(tr -d '\n' < $0)"
+	# split a string from file and print this split string
+	IFS=';' read -ra TAMATARR <<< "$(tr -d '\n' < $0)" && for EMSTRING in "${TAMATARR[@]}" ; do printf "\\e[0;32m%s" "$EMSTRING" ; sleep 0.0"$(shuf -i 0-999 -n 1)" ; done ; tail -n 8 "$0" ; printf "\\e[0m" ; printf "\\e[?25h"; exit
 }
 # espritfunctions.bash EOF

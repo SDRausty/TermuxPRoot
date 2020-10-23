@@ -35,15 +35,40 @@ trap _SGSATRPEXIT_ EXIT
 trap _SGSATRPSIGNAL_ HUP INT TERM
 trap _SGSATRPQUIT_ QUIT
 
+RDR="$(pwd)"
+_GSA_() { # git repository update modules
+	WRDR="$1"
+	(git submodule update $3 --depth 1 --init --recursive --remote "$1" && _PRCS_) || _PESTRG_ "$1" update # the command ` git submodule help ` and the book https://git-scm.com/book/en/v2/Git-Tools-Submodules have more information about git submodules
+}
+
 _PESTRG_() {
 	printf "\\n\\n%s\\n" "Cannot $2 module $1 : Continuing..."
 }
 
-_GSA_() { # git repository update modules
-	(git submodule update $3 --depth 1 --init --recursive --remote "$1") || _PESTRG_ "$1" update # the command ` git submodule help ` and the book https://git-scm.com/book/en/v2/Git-Tools-Submodules have more information about git submodules
-	sleep 0."$(shuf -i 24-72 -n 1)" # latency support
+_PRCS_ () {	# print checksums message and run sha512sum 
+	cd $WRDR
+	if [[ -f sha512.sum ]]
+	then
+		_PRT_ "Checking checksums in direcory $(pwd) with sha512sum: "
+		sha512sum -c --quiet sha512.sum 2>/dev/null || echo FAILED # sha512sum -c sha512.sum
+		_PRNT_  "DONE"
+	else 
+		printf "%s\\n" "No file 'sha512.sum' found in directory $(pwd)."
+	fi
+	cd $RDR
+#	sleep 0."$(shuf -i 24-72 -n 1)" # latency support
 }
+
+_PRT_ () {	# print message with no trialing newline
+	printf "%s" "$1"
+}
+
+_PRNT_ () {	# print message with one trialing newline
+	printf "%s\\n" "$1"
+}
+
 git pull || printf "\\n\\n%s\\n" "Cannot git pull : Continuing..."
+sha512sum -c --quiet sha512.sum || _PRNT_ "WARNING:  Checking checksums in direcory $(pwd) with sha512sum FAILED! "
 SIAD="$(grep url .git/config|cut -d"=" -f 2|head -n 1|cut -d"/" -f 2-3)"
 OUNA="/shlibs"
 _GSA_ "\.scripts/maintenance" maintenance "" || printf "\\n\\n%s\\n" "Cannot add or update module .scripts/maintenance : Continuing..."

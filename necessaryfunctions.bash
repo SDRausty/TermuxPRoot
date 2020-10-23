@@ -43,6 +43,7 @@ _ADDADDS_() {
 	_ADDkeys_
 	_ADDmakefakeroottcp_
 	_ADDmakeyay_
+	_ADDorcaconf_
 	_ADDpatchmakepkg_
 	_ADDpc_
 	_ADDpci_
@@ -61,11 +62,11 @@ _CALLSYSTEM_() {
 	declare COUNTER=""
 	if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX86_64" ]]
 	then
-		_GETIMAGE_ || _PSGI1ESTRING_ "_GETIMAGE_ _CALLSYSTEM_ necessaryfunctions.bash ${0##}"
+		_GETIMAGE_ || FRV="$?" && ([[ $FRV = 3 ]] || [[ $FRV = 22 ]]) && _PSGI1ESTRING_ "FRV=$FRV until _FTCHSTND_ necessaryfunctions.bash ${0##}"
 	else
 		if [[ "$CMIRROR" = "os.archlinuxarm.org" ]] || [[ "$CMIRROR" = "mirror.archlinuxarm.org" ]]
 		then
-			until _FTCHSTND_ || _PSGI1ESTRING_ "until _FTCHSTND_ necessaryfunctions.bash ${0##}" && break
+			until _FTCHSTND_ || FRV="$?" && [[ -z "${FRV:-}" ]] && break || ([[ $FRV = 3 ]] || [[ $FRV = 22 ]]) && _PSGI1ESTRING_ "FRV=$FRV until _FTCHSTND_ necessaryfunctions.bash ${0##}" && break
 			do
 				_FTCHSTND_
 				sleep 2
@@ -163,7 +164,7 @@ _KERNID_
 
 _MAINBLOCK_() {
 	_NAMESTARTARCH_
-	_SPACEINFO_
+#	_SPACEINFO_
 	_PREPINSTALLDIR_
 	_DETECTSYSTEM_
 	_WAKEUNLOCK_
@@ -175,9 +176,9 @@ _MAINBLOCK_() {
 }
 
 _DOPROXY_() {
-	[[ -f "$HOME"/.bash_profile ]] && grep "proxy" "$HOME"/.bash_profile | grep "export" >> root/bin/"$BINFNSTP" 2>/dev/null ||:
-	[[ -f "$HOME"/.bashrc ]] && grep "proxy" "$HOME"/.bashrc  | grep "export" >> root/bin/"$BINFNSTP" 2>/dev/null ||:
-	[[ -f "$HOME"/.profile ]] && grep "proxy" "$HOME"/.profile | grep "export" >> root/bin/"$BINFNSTP" 2>/dev/null ||:
+	[[ -f "$HOME"/.bash_profile ]] && grep -s "proxy" "$HOME"/.bash_profile | grep -s "export" >> root/bin/"$BINFNSTP" ||:
+	[[ -f "$HOME"/.bashrc ]] && grep -s "proxy" "$HOME"/.bashrc  | grep -s "export" >> root/bin/"$BINFNSTP" ||:
+	[[ -f "$HOME"/.profile ]] && grep -s "proxy" "$HOME"/.profile | grep -s "export" >> root/bin/"$BINFNSTP" ||:
 }
 
 _MAKEFINISHSETUP_() {
@@ -373,8 +374,11 @@ _MAKESYSTEM_() {
 	_WAKELOCK_
 	_CALLSYSTEM_
 	_PRINTMD5CHECK_
-	_MD5CHECK_
-	_PRINTCU_
+	_DOMAKESYSTEM_() {
+		_MD5CHECK_
+		_PRINTCU_
+	}
+	_TASPINNER_ clock & _DOMAKESYSTEM_ ; kill $!
        	[[ "$KEEP" -ne 0 ]] && rm -f "$INSTALLDIR"/*.tar.gz "$INSTALLDIR"/*.tar.gz.md5 # set KEEP to 0 in file 'knownconfigurations.bash' after using either 'setupTermuxArch bloom' or 'setupTermuxArch manual' to keep the INSTALLDIR/*.tar.gz and INSTALLDIR/*.tar.gz.md5 files.
 	_PRINTDONE_
 	_PRINTCONFIGUP_
@@ -405,13 +409,13 @@ _PREPROOTDIR_() {
 _PREPINSTALLDIR_() {
 	cd "$INSTALLDIR"
 	_PREPROOTDIR_
-	_SETLANGUAGE_
-	_ADDADDS_
+	_SETLANGUAGE_ 
+	_TASPINNER_ clock & _ADDADDS_ ; kill $! && printf "\\n"
 	_MAKEFINISHSETUP_
 	_MAKESETUPBIN_
 	_MAKESTARTBIN_
 	_FIXOWNER_
-  	[[ $ELCR == 0 ]] && exit ||: # _PSGI1ESTRING_ "_PREPINSTALLDIR_ necessaryfunctions.bash ${0##*/}"	##  Create ~/TermuxArchBloom directory and Arch Linux in Termux PRoot root directory skeleton.  Commands 'setupTermuxArch b[l[oom]]' can be used to access these features.  These options do NOT install the complete root file system.
+  	[[ $ELCR == 0 ]] && exit ||: ##	Create ~/TermuxArchBloom directory and Arch Linux in Termux PRoot root directory skeleton.  Commands 'setupTermuxArch b[l[oom]]' can be used to access these features.  These options do NOT install the complete root file system.
 }
 
 _PREPROOT_() {
@@ -425,10 +429,13 @@ _PREPROOT_() {
 
 _RUNFINISHSETUP_() {
 	_ADDresolvconf_
-	cp "$INSTALLDIR/etc/pacman.d/mirrorlist" "$INSTALLDIR/var/backups/${INSTALLDIR##*/}/etc/mirrorlist.$SDATE.bkp" || _PSGI1ESTRING_ "cp _RUNFINISHSETUP_ necessaryfunctions.bash ${0##*/}"
+	ALMLLOCN="$INSTALLDIR/etc/pacman.d/mirrorlist"
+	cp "$ALMLLOCN" "$INSTALLDIR/var/backups/${INSTALLDIR##*/}/etc/mirrorlist.$SDATE.bkp" || _PSGI1ESTRING_ "cp _RUNFINISHSETUP_ necessaryfunctions.bash ${0##*/}"
 	if [[ "$CPUABI" = "$CPUABIX86" ]] 
 	then
-		curl https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirrorlist -o "$INSTALLDIR/etc/pacman.d/mirrorlist"
+		AL32MRLT="https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirrorlist"
+		printf "\\e[0m\\n%s\\n" "Updating ${ALMLLOCN##*/} from $AL32MRLT."
+		curl "$AL32MRLT" -o "$ALMLLOCN"
 	fi
 	_SEDUNCOM_() {
 			sed -i "/\/mirror.archlinuxarm.org/ s/^# *//" "$INSTALLDIR/etc/pacman.d/mirrorlist" || _PSGI1ESTRING_ "sed -i _SEDUNCOM_ necessaryfunctions.bash ${0##*/}" # sed replace a character in a matched line in place
@@ -473,14 +480,14 @@ _SETLANGUAGE_() { # This function uses device system settings to set locale.  To
 	LANGIN+=([7]="$(getprop ro.product.locale.region)")
 	touch "$INSTALLDIR"/etc/locale.gen
 	ULANGUAGE="${LANGIN[0]:-unknown}_${LANGIN[1]:-unknown}"
-       	if ! grep "$ULANGUAGE" "$INSTALLDIR"/etc/locale.gen 1>/dev/null
+       	if ! grep -q "$ULANGUAGE" "$INSTALLDIR"/etc/locale.gen
 	then
 		ULANGUAGE="unknown"
        	fi
  	if [[ "$ULANGUAGE" != *_* ]]
 	then
  		ULANGUAGE="${LANGIN[3]:-unknown}_${LANGIN[2]:-unknown}"
- 	       	if ! grep "$ULANGUAGE" "$INSTALLDIR"/etc/locale.gen 1>/dev/null
+ 	       	if ! grep -q "$ULANGUAGE" "$INSTALLDIR"/etc/locale.gen
 		then
  			ULANGUAGE="unknown"
  	       	fi
@@ -496,7 +503,7 @@ _SETLANGUAGE_() { # This function uses device system settings to set locale.  To
  	if [[ "$ULANGUAGE" != *_* ]]
 	then
  		ULANGUAGE="${LANGIN[6]:-unknown}_${LANGIN[7]:-unknown}"
- 	       	if ! grep "$ULANGUAGE" "$INSTALLDIR"/etc/locale.gen 1>/dev/null
+ 	       	if ! grep -q "$ULANGUAGE" "$INSTALLDIR"/etc/locale.gen
 		then
  			ULANGUAGE="unknown"
  	       	fi
@@ -505,7 +512,7 @@ _SETLANGUAGE_() { # This function uses device system settings to set locale.  To
 	then
    		ULANGUAGE="en_US"
  	fi
-	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\n" "Setting locales to: " "Language " ">> $ULANGUAGE << " "Region" ": Please wait a moment."
+	printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s  " "Setting locales to: " "Language " ">> $ULANGUAGE << " "Region" ": Please wait a moment  "
 }
 
 _SETLOCALE_() { # This function uses device system settings to set locale.  To generate locales in a preferred language you can use "Settings > Language & Keyboard > Language" in Android; Then run 'setupTermuxArch r' for a quick system refresh.

@@ -4,13 +4,14 @@
 # https://termuxarch.github.io/TermuxArch/CONTRIBUTORS thank you for helping
 # command 'setupTermuxArch h[elp]' has information how to use this file
 ################################################################################
-VERSIONID=2.0.271
 IFS=$'\n\t'
+VERSIONID=2.0.292
 set -Eeuo pipefail
 shopt -s nullglob globstar
 umask 0022
 unset LD_PRELOAD
 ## INIT FUNCTIONS ##############################################################
+## The entire dataset can be viewed and work on with command 'setupTermuxArch bloom' which downloads all the components of TermuxArch into a ~/TermuxArchBloom directory in the home directory.  The command 'setupTermuxArch bloom' is very similar to command 'setupTermuxArch manual' but much more expansive, verbose.  Command 'setupTermuxArch h[elp]' has additional information how to use this file.
 _STRPERROR_() { # run on script error
 	local RV="$?"
 	printf "\\e[?25h\\n\\e[1;48;5;138m %s\\e[0m\\n" "TermuxArch WARNING:  Generated script signal ${RV:-unknown} near or at line number ${1:-unknown} by '${2:-command}'!"
@@ -304,8 +305,7 @@ _INTROSYSINFO_() {
 	_SYSINFO_ "$@"
 }
 
-_INTROREFRESH_() {
-	printf '\033]2;  bash setupTermuxArch refresh 📲 \007'
+_DODIRCHK_() {
 	_SETROOT_EXCEPTION_
 	if [[ ! -d "$INSTALLDIR" ]] || [[ ! -d "$INSTALLDIR"/root/bin ]] || [[ ! -d "$INSTALLDIR"/var/binds ]] || [[ ! -f "$INSTALLDIR"/bin/we ]] || [[ ! -f "$INSTALLDIR"/usr/bin/env ]]
 	then
@@ -319,10 +319,15 @@ _INTROREFRESH_() {
 				if [[ ! -d "$INSTALLDIR/$IDIRNAME" ]]
 				then
 					DIRCHECK=1
+				else
+					DIRCHECK=0
 				fi
 			done
 		fi
-		if [[ "$DIRCHECK" -eq 1 ]]
+		if [[ -z "${DIRCHECK:-}" ]]
+		then
+			printf "‰s\\n" "Variable DIRCHECK is unbound."
+		elif [[ "$DIRCHECK" -eq 1 ]]
 		then	# delete superfluous tmp dir
 			rm -rf "$INSTALLDIR"/tmp
 			rm -rf "$INSTALLDIR"
@@ -330,6 +335,12 @@ _INTROREFRESH_() {
 		exit 204
 	fi
 	printf "\\n\\e[0;34m 🕛 > 🕛 \\e[1;34mＴｅｒｍｕｘＡｒｃｈ $VERSIONID will refresh your TermuxArch files in \\e[0;32m~/${INSTALLDIR##*/}\\e[1;34m.  Ensure background data is not restricted.  Run \\e[0;32mbash ${0##*/} help \\e[1;34mfor additional information.  Check the wireless connection if you do not see one o'clock 🕐 below.  "
+}
+
+_INTROREFRESH_() {
+	printf '\033]2;  bash setupTermuxArch refresh 📲 \007'
+	_QEMUCFCK_
+	_DODIRCHK_
 	_DEPENDSBLOCK_ "$@"
 	_REFRESHSYS_ "$@"
 }
@@ -349,12 +360,12 @@ _MANUAL_() {
 	_EDITORS_
 	if [[ -f "${WDIR}setupTermuxArchConfigs.bash" ]]
 	then
-		"$ed" "${WDIR}setupTermuxArchConfigs.bash"
+		editor "${WDIR}setupTermuxArchConfigs.bash"
 		_LOADCONF_
 	else
 		cp knownconfigurations.bash "${WDIR}setupTermuxArchConfigs.bash"
 		sed -i "7s/.*/\# The architecture of this device is $CPUABI; Adjust configurations in the appropriate section.  Change CMIRROR (https:\/\/wiki.archlinux.org\/index.php\/Mirrors and https:\/\/archlinuxarm.org\/about\/mirrors) to desired geographic location to resolve 404 and checksum issues.  /" "${WDIR}setupTermuxArchConfigs.bash"
-		"$ed" "${WDIR}setupTermuxArchConfigs.bash"
+		editor "${WDIR}setupTermuxArchConfigs.bash"
 		. "${WDIR}setupTermuxArchConfigs.bash"
 		_PRINTCONFLOADED_
 	fi
@@ -522,6 +533,13 @@ _PSGI1ESTRING_() {	# print signal generated in arg 1 format
 	printf "\\e[1;33mSIGNAL GENERATED in %s\\e[1;34m : \\e[1;32mCONTINUING...  \\e[0;34mExecuting \\e[0;32m%s\\e[0;34m in the native shell once the installation and configuration process completes will attempt to finish the autoconfiguration and installation if the installation and configuration processes were not completely successful.  Should better solutions for \\e[0;32m%s\\e[0;34m be found, please open an issue and accompanying pull request if possible.\\nThe entire script can be reviewed by creating a \\e[0;32m%s\\e[0;34m directory with the command \\e[0;32m%s\\e[0;34m which can be used to access the entire installation script.  This option does NOT configure and install the root file system.  This command transfers the entire script into the home directory for hacking, modification and review.  The command \\e[0;32m%s\\e[0;34m has more information about how to use use \\e[0;32m%s\\e[0;34m in an effective way.\\e[0;32m%s\\e[0m\\n" "'$1'" "'bash ${0##*/} refresh'" "'${0##*/}'" "'~/TermuxArchBloom/'" "'setupTermuxArch b'" "'setupTermuxArch help'" "'${0##*/}'"
 }
 
+_QEMUCFCK_() {
+if [[ -f "$INSTALLDIR/$STARTBIN" ]] && grep -q qemu- "$INSTALLDIR/$STARTBIN"
+then	# set installed qemu architecture
+	ARCHITEC="$(ARCTEVAR="$(grep -m1 qemu $INSTALLDIR/$STARTBIN)" && ARCTFVAR=${ARCTEVAR#*qemu-} && cut -d" " -f1 <<< $ARCTFVAR)" && CPUABI="$ARCHITEC" && INCOMM="qemu-user-$ARCHITEC" && QEMUCR=0 
+fi
+}
+
 _QEMU_ () {
 	_INST_() { # checks for neccessary commands
 	COMMS="$1"
@@ -531,6 +549,7 @@ _QEMU_ () {
 	STRING2="Cannot update ~/${0##*/} prerequisite: Continuing..."
 	PKG="$2"
 	_INPKGS_() {
+		printf "%s\\n" "Beginning qemu '$3' setup:"
 		if [ "$COMMANDIF" = au ]
 		then 
 			au "$PKG" || printf "%s\\n" "$STRING2"
@@ -540,17 +559,15 @@ _QEMU_ () {
 	}
 	if ! command -v "$COMMS"
 	then
-		printf "%s\\n" "Beginning qemu '$3' setup:"
 		_INPKGS_
 	fi
 	}
-	printf "Setting mode to qemu.\\n"
-	if [[ -f "$INSTALLDIR/$STARTBIN" ]] && grep qemu- "$INSTALLDIR/$STARTBIN" 1>/dev/null
-	then	# set installed qemu architecture
-		ARCHITEC="$(ARCTEVAR="$(grep -m1 qemu $INSTALLDIR/$STARTBIN)" && ARCTFVAR=${ARCTEVAR#*qemu-} && cut -d" " -f1 <<< $ARCTFVAR)" && CPUABI="$ARCHITEC" && INCOMM="qemu-user-$ARCHITEC" && QEMUCR=0 
-	else	# user chooses qemu architecture to installed 
-		printf "%s\\n" "Please select the architecture by number from this list:"
-		select ARCHITECTURE in armeabi armeabi-v7a arm64-v8a x86 x86_64;
+	_QEMUCFCK_
+	# user chooses qemu architecture to installed 
+	printf "Command '%s' version %s;  Setting install mode with QEMU emulation;  Please select the architecture to install by number (1-5) from this list:\\n" "${0##*/}" "$VERSIONID"
+	if [[ -z "${ARCHITEC:-}" ]]
+	then
+	select ARCHITECTURE in armeabi armeabi-v7a arm64-v8a x86 x86_64 exit;
 		do
 			CPUABI="$ARCHITECTURE" 
 			if [[ "$ARCHITECTURE" == armeabi ]] || [[ "$ARCHITECTURE" == armeabi-v7a ]]
@@ -565,9 +582,11 @@ _QEMU_ () {
 			elif [[ "$ARCHITECTURE" == x86_64 ]] 
 			then
 				ARCHITEC="x86_64" 
+			elif [[ "$ARCHITECTURE" == exit ]] 
+			then
+				exit
 			fi
-			INCOMM="qemu-user-$ARCHITEC"
-			[[ $CPUABI == *arm* ]] || [[ $CPUABI == *86* ]] && printf "%s\\n" "Architecture number $REPLY ($CPUABI) was picked from the list;  The chosen architecture for installation is $CPUABI." && QEMUCR=0 && break || printf "%s\\n" "Please select the architecture by number."
+			[[ $CPUABI == *arm* ]] || [[ $CPUABI == *86* ]] && printf "%s\\n" "Option ($REPLY) with architecture $CPUABI was picked from this list;  The chosen Arch Linux architecture for installation with emulation is $CPUABI:  " && INCOMM="qemu-user-$ARCHITEC" && QEMUCR=0 && break || printf "%s\\n" "Answer ($REPLY) was chosen;  Please select the architecture by number from this list: (1) armeabi, (2) armeabi-v7a, (3) arm64-v8a, (4) x86, (5) x86_64 or choose option (6) exit to exit command '${0##*/}':"
 		done
 	fi
 	if ! command -v "${INCOMM//-user}"
@@ -835,7 +854,7 @@ then
 	printf "\\nSetting mode to purge.\\n"
 	_ARG2DIR_ "$@"
 	_RMARCHQ_
-## [q[emu] [customdir]]  Partial Implementation:  Install alternate architecture on smartphone with QEMU.
+## [q[emu] [refresh] [customdir]]  Install alternate architecture on smartphone with QEMU.
 elif [[ "${1//-}" = [Qq]* ]]
 then
 	_PREPTERMUXARCH_
@@ -862,6 +881,13 @@ then
 	printf "\\n\\e[0;32mSetting mode\\e[1;34m: \\e[1;32mminimal refresh\\e[1;34m:\\e[0;32m For a full refresh you can use the \\e[1;32m'%s' \\e[0;32m%s\\e[1;34m...\\n\\e[0m" "${0##*/} refresh" "command"
 	_ARG2DIR_ "$@"
 	_INTROREFRESH_ "$@"
+## [u[nicorn] [refresh] [customdir]]  Partial Implementation:  Install alternate architecture on smartphone with Unicorn.  This option currently defaults to option qemu.
+elif [[ "${1//-}" = [Uu]* ]]
+then
+	_PREPTERMUXARCH_
+	_QEMU_ # this option currently defaults to option qemu
+	_OPT1_ "$@"
+	_INTRO_ "$@"
 ## [wd|ws]  Get device system information with 'wget'.
 elif [[ "${1//-}" = [Ww][Dd]* ]] || [[ "${1//-}" = [Ww][Ss]* ]]
 then
