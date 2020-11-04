@@ -167,6 +167,7 @@ _MAINBLOCK_() {
 _NAMESTARTARCH_
 _SPACEINFO_
 _PREPINSTALLDIR_
+_COPYSTARTBIN2PATH_
 _DETECTSYSTEM_
 _WAKEUNLOCK_
 _PRINTFOOTER_
@@ -183,55 +184,68 @@ _DOPROXY_() {
 }
 
 _MAKEFINISHSETUP_() {
-_CFLHDR_ "root/bin/$BINFNSTP"
 _DOKEYS_() {
 if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = i386 ]]
 then
-printf "/root/bin/keys x86\\n" >> root/bin/"$BINFNSTP"
+DOKYSKEY="/root/bin/keys x86"
 elif [[ "$CPUABI" = "$CPUABIX86_64" ]]
 then
-printf "/root/bin/keys x86_64\\n" >> root/bin/"$BINFNSTP"
+DOKYSKEY="/root/bin/keys x86_64"
 else
-printf "/root/bin/keys\\n" >> root/bin/"$BINFNSTP"
+DOKYSKEY="/root/bin/keys"
 fi
 }
-_DOPROXY_
-[[ "${LCR:-}" -ne 1 ]] && LOCGEN=""
-[[ "${LCR:-}" -ne 2 ]] && LOCGEN=""
-[[ -z "${LCR:-}" ]] && LOCGEN="_DOKEYS_
-locale-gen "
+_DOKYLGEN_() {
+DOKYSKEY=""
+LOCGEN=""
+}
+if [[ "${LCR:-}" -eq 3 ]] || [[ "${LCR:-}" -eq 4 ]] || [[ "${LCR:-}" -eq 5 ]] || [[ -z "${LCR:-}" ]]	# equals 3 or 4 or is undefined
+then
+_DOKEYS_
+LOCGEN="locale-gen || locale-gen"
+elif [[ "${LCR:-}" -eq 1 ]]	# equals 1
+then
+_DOKYLGEN_
+elif [[ "${LCR:-}" -eq 2 ]]	# equals 2
+then
+_DOKYLGEN_
+fi
+_CFLHDR_ "root/bin/$BINFNSTP"
 cat >> root/bin/"$BINFNSTP" <<- EOM
 _PMFSESTRING_() {
 printf "\\e[1;31m%s\\e[1;37m%s\\e[1;32m%s\\e[1;37m%s\\n\\n" "Signal generated in '\$1' : Cannot complete task : " "Continuing...   To correct the error run " "setupTermuxArch refresh" " to attempt to finish the autoconfiguration."
 printf "\\e[1;34m%s\\e[0;34m%s\\e[1;34m%s\\e[0;34m%s\\e[1;34m%s\\n\\n" "  If you find better resolves for " "setupTermuxArch" " and " "\$0" ", please open an issue and accompanying pull request."
 }
-printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n" "To generate locales in a preferred language use " "Settings > Language & Keyboard > Language " "in Android; Then run " "${0##*/} refresh" " for a full system refresh including locale generation; For a quick refresh you can use " "${0##*/} r" ".  For a refresh with user directories " "${0##*/} re" " can be used."
+_PMGPSSTRING_() {
 printf "\\n\\e[1;34m:: \\e[1;32m%s\\n" "Processing system for $NASVER $CPUABI, and removing redundant packages for Termux PRoot installation if necessary..."
+}
 EOM
-if [[ -z "${LCR:-}" ]] # is undefined
-then
-# printf "%s\\n" "pacman -Syy || pacman -Syy || _PMFSESTRING_ \"pacman -Syy $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
-_DOKEYS_
+_DOPROXY_
 if [[ "$CPUABI" = "$CPUABI5" ]]
 then
-printf "%s\\n" "pacman -Rc linux-armv5 linux-firmware --noconfirm --color=always || _PMFSESTRING_ \"pacman -Rc linux-armv5 linux-firmware $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+printf "%s\\n" "_PMGPSSTRING_ && pacman -Rc linux-armv5 linux-firmware --noconfirm --color=always || _PMFSESTRING_ \"pacman -Rc linux-armv5 linux-firmware $BINFNSTP \${0##/*}\"" >> root/bin/"$BINFNSTP"
 elif [[ "$CPUABI" = "$CPUABI7" ]]
 then
-printf "%s\\n" "pacman -Rc linux-armv7 linux-firmware --noconfirm --color=always || _PMFSESTRING_ \"pacman -Rc linux-armv7 linux-firmware $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+printf "%s\\n" "_PMGPSSTRING_ && pacman -Rc linux-armv7 linux-firmware --noconfirm --color=always || _PMFSESTRING_ \"pacman -Rc linux-armv7 linux-firmware $BINFNSTP \${0##/*}\"" >> root/bin/"$BINFNSTP"
 elif [[ "$CPUABI" = "$CPUABI8" ]]
 then
-printf "%s\\n" "pacman -Rc linux-aarch64 linux-firmware --noconfirm --color=always || _PMFSESTRING_ \"pacman -Rc linux-aarch64 linux-firmware $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+printf "%s\\n" "_PMGPSSTRING_ && pacman -Rc linux-aarch64 linux-firmware --noconfirm --color=always || _PMFSESTRING_ \"pacman -Rc linux-aarch64 linux-firmware $BINFNSTP \${0##/*}\"" >> root/bin/"$BINFNSTP"
 fi
+cat >> root/bin/"$BINFNSTP" <<- EOM
+$DOKYSKEY
+EOM
 if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX86_64" ]] || [[ "$CPUABI" = i386 ]]
 then
 printf "%s\\n" "pacman -Su grep gzip patch sed sudo unzip --noconfirm --color=always || pacman -Su gzip patch sed sudo unzip --noconfirm --color=always || _PMFSESTRING_ \"pacman -Su gzip patch sed sudo unzip $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 else
 printf "%s\\n" "pacman -Su patch sudo unzip --noconfirm --color=always || pacman -Su patch sudo unzip --noconfirm --color=always || _PMFSESTRING_ \"pacman -Su patch sudo unzip $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 fi
-printf "%s\\n" "/root/bin/addauser user || _PMFSESTRING_ \"addauser user $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
-fi
 cat >> root/bin/"$BINFNSTP" <<- EOM
-$LOCGEN
+printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n" "To generate locales in a preferred language use " "Settings > Language & Keyboard > Language " "in Android; Then run " "${0##*/} refresh" " for a full system refresh including locale generation; For a quick refresh you can use " "${0##*/} r" ".  For a refresh with user directories " "${0##*/} re" " can be used."
+$LOCGEN || _PMFSESTRING_ "LOCGEN $BINFNSTP ${0##/*}.  Please run '$LOCGEN' again in the installed system."
+EOM
+printf "%s\\n" "/root/bin/addauser user || _PMFSESTRING_ \"addauser user $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+cat >> root/bin/"$BINFNSTP" <<- EOM
 printf "\\n\\e[1;34m%s  \\e[0m" "🕛 > 🕤 Arch Linux in Termux is installed and configured 📲  "
 printf "\\e]2;%s\\007" " 🕛 > 🕤 Arch Linux in Termux is installed and configured 📲"
 EOM
@@ -415,9 +429,9 @@ _FIXOWNER_
 _PREPROOT_() {
 if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX86_64" ]] || [[ "$CPUABI" = i386 ]]
 then
-proot --link2symlink -0 bsdtar -x -p -f "$IFILE" --strip-components 1
+proot --link2symlink -0 bsdtar -p -xf "$IFILE" --strip-components 1
 else
-proot --link2symlink -0 bsdtar -x -p -f "$IFILE"
+proot --link2symlink -0 bsdtar -p -xf "$IFILE"
 fi
 }
 
@@ -429,7 +443,7 @@ if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = i386 ]]
 then
 AL32MRLT="https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirrorlist"
 printf "\\e[0m\\n%s\\n" "Updating ${ALMLLOCN##*/} from $AL32MRLT."
-curl "$AL32MRLT" -o "$ALMLLOCN"
+curl --retry 4 "$AL32MRLT" -o "$ALMLLOCN"
 fi
 _SEDUNCOM_() {
 sed -i "/\/mirror.archlinuxarm.org/ s/^# *//" "$INSTALLDIR/etc/pacman.d/mirrorlist" || _PSGI1ESTRING_ "sed -i _SEDUNCOM_ necessaryfunctions.bash ${0##*/}" # sed replace a character in a matched line in place
@@ -449,15 +463,16 @@ printf "%s\\n" "Did not find server $NMIR in /etc/pacman.d/mirrorlist; Adding $N
 printf "%s\\n" "Server = $NLCMIRROR/\$arch/\$repo" >> "$INSTALLDIR/etc/pacman.d/mirrorlist"
 fi
 else
-if [[ "$ed" = "" ]]
+if [[ -z "${USEREDIT:-}" ]] || [[ "$USEREDIT" = "" ]]
 then
 _EDITORS_
-fi
+else
 if [[ ! "$(sed 1q  "$INSTALLDIR"/etc/pacman.d/mirrorlist)" = "# # # # # # # # # # # # # # # # # # # # # # # # # # #" ]]
 then
 _EDITFILES_
 fi
-"$ed" "$INSTALLDIR/etc/pacman.d/mirrorlist"
+fi
+"$USEREDIT" "$INSTALLDIR/etc/pacman.d/mirrorlist"
 fi
 "$INSTALLDIR/root/bin/setupbin.bash" || _PRINTPROOTERROR_
 }
