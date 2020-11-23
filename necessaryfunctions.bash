@@ -56,7 +56,6 @@ _ADDtrim_
 _ADDv_
 _ADDwe_
 _ADDyt_
-_DOMODdotfiles_
 }
 
 _CALLSYSTEM_() {
@@ -187,26 +186,23 @@ _MAKEFINISHSETUP_() {
 _DOKEYS_() {
 if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = i386 ]]
 then
-DOKYSKEY="/root/bin/keys x86"
+DOKYSKEY="keys x86"
 elif [[ "$CPUABI" = "$CPUABIX86_64" ]]
 then
-DOKYSKEY="/root/bin/keys x86_64"
+DOKYSKEY="keys x86_64"
 else
-DOKYSKEY="/root/bin/keys"
+DOKYSKEY="keys"
 fi
 }
 _DOKYLGEN_() {
 DOKYSKEY=""
-LOCGEN=""
+LOCGEN=":"
 }
-if [[ "${LCR:-}" -eq 3 ]] || [[ "${LCR:-}" -eq 4 ]] || [[ "${LCR:-}" -eq 5 ]] || [[ -z "${LCR:-}" ]]	# equals 3 or 4 or is undefined
+if [[ "${LCR:-}" -eq 3 ]] || [[ "${LCR:-}" -eq 4 ]] || [[ "${LCR:-}" -eq 5 ]] || [[ -z "${LCR:-}" ]]	# LCR equals 3 or 4 or 5 or is undefined
 then
 _DOKEYS_
 LOCGEN="locale-gen || locale-gen"
-elif [[ "${LCR:-}" -eq 1 ]]	# equals 1
-then
-_DOKYLGEN_
-elif [[ "${LCR:-}" -eq 2 ]]	# equals 2
+elif [[ "${LCR:-}" -eq 1 ]] || [[ "${LCR:-}" -eq 2 ]]	# LCR equals 1 or 2
 then
 _DOKYLGEN_
 fi
@@ -234,17 +230,22 @@ fi
 cat >> root/bin/"$BINFNSTP" <<- EOM
 $DOKYSKEY
 EOM
-if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX86_64" ]] || [[ "$CPUABI" = i386 ]]
+if [[ "${LCR:-}" -eq 3 ]] || [[ "${LCR:-}" -eq 4 ]] || [[ "${LCR:-}" -eq 5 ]] || [[ -z "${LCR:-}" ]]	# LCR equals 3 or 4 or 5 or is undefined
+then
+if [[ "$CPUABI" = "$CPUABIX86_64" ]]
 then
 printf "%s\\n" "pacman -Su grep gzip patch sed sudo unzip --noconfirm --color=always || pacman -Su gzip patch sed sudo unzip --noconfirm --color=always || _PMFSESTRING_ \"pacman -Su gzip patch sed sudo unzip $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
-else
+elif [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = i386 ]]
+then
 printf "%s\\n" "pacman -Su patch sudo unzip --noconfirm --color=always || pacman -Su patch sudo unzip --noconfirm --color=always || _PMFSESTRING_ \"pacman -Su patch sudo unzip $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+fi
 fi
 cat >> root/bin/"$BINFNSTP" <<- EOM
 printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n" "To generate locales in a preferred language use " "Settings > Language & Keyboard > Language " "in Android; Then run " "${0##*/} refresh" " for a full system refresh including locale generation; For a quick refresh you can use " "${0##*/} r" ".  For a refresh with user directories " "${0##*/} re" " can be used."
 $LOCGEN || _PMFSESTRING_ "LOCGEN $BINFNSTP ${0##/*}.  Please run '$LOCGEN' again in the installed system."
 EOM
-printf "%s\\n" "/root/bin/addauser user || _PMFSESTRING_ \"addauser user $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+printf "%s\\n" "printf \"\\n\\e[1;32m==> \\e[1;37mRunning TermuxArch command \\e[1;32maddauser user\\e[1;37m...\\n\"" >> root/bin/"$BINFNSTP"
+printf "%s\\n" "addauser user || _PMFSESTRING_ \"addauser user $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 cat >> root/bin/"$BINFNSTP" <<- EOM
 printf "\\n\\e[1;34m%s  \\e[0m" "🕛 > 🕤 Arch Linux in Termux is installed and configured 📲  "
 printf "\\e]2;%s\\007" " 🕛 > 🕤 Arch Linux in Termux is installed and configured 📲"
@@ -258,7 +259,7 @@ cat >> root/bin/setupbin.bash <<- EOM
 set +Eeuo pipefail
 umask 0022
 EOM
-printf "%s\\n" "$PROOTSTMNT /root/bin/$BINFNSTP ||:" >> root/bin/setupbin.bash
+printf "%s\\n" "$PROOTSTMNT /root/bin/$BINFNSTP || printf \"%s\\n\" \"Signal generated; continuing...\"" >> root/bin/setupbin.bash
 cat >> root/bin/setupbin.bash <<- EOM
 set -Eeuo pipefail
 EOM
@@ -275,16 +276,15 @@ then
 printf "\\n\\e[1;48;5;138mScript %s\\e[0m\\n\\n" "$STARTBIN \${0##*/} WARNING:  Run \${0##*/} and $INSTALLDIR/\${0##*/} from the BASH shell in Termux:  Exiting..."
 exit 202
 fi
-declare -g AR2AR="\${@:2}"
 declare -g AR3AR="\${@:3}"
 _PRINTUSAGE_() {
 printf "\\e]2;%s\\007" "TermuxArch $STARTBIN help 📲"
 printf "\\n\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN" "  start Arch Linux as root.  This account is reserved for system administration."
 printf "\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN c[ommand] command" "  run Arch Linux command from Termux as root user."
-printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN l[ogin]|u[ser] user" "  login as user.  This option is preferred when installing software and using the command 'makeyay'."
-printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN el[ogin]|eu[ser] user" "  use alternate elogin or euser option to login as user.  This option is preferred when using the command 'git' in shared storage."
+printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN l[ogin] | u[ser] user" "  login as user.  This option is preferred when installing software and using the command 'makeyay'."
+printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN el[ogin] | eu[ser] user" "  use alternate elogin or euser option to login as user.  This option is preferred when using the command 'git' in shared storage."
 printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN r[aw]" "  construct the " "$STARTBIN " "proot statement from exec.../bin/.  For example " "$STARTBIN r su " "will exec su in Arch Linux."
-printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n\\e[0m" "$STARTBIN s[u] user command" "  login as user and execute command.  Use " "$STARTBIN c addauser user " "first to create this user and user's home directory."
+printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n\\e[0m" "$STARTBIN s[u] user command" "  login as user and execute command.  Please use " "$STARTBIN c addauser user " "first to create this user and user's home directory."
 }
 # [] Default Arch Linux in Termux PRoot root login.
 if [[ -z "\${1:-}" ]]
@@ -296,7 +296,7 @@ printf "%s\\n" "$PROOTSTMNT /bin/bash -l ||: " >> "$STARTBIN"
 cat >> "$STARTBIN" <<- EOM
 set -Eeuo pipefail
 printf '\033]2; TermuxArch $STARTBIN 📲  \007'
-# [?|help] Displays usage information.
+# [? | help] Displays usage information.
 elif [[ "\${1//-}" = [?]* ]] || [[ "\${1//-}" = [Hh]* ]]
 then
 _PRINTUSAGE_
@@ -308,31 +308,31 @@ touch $INSTALLDIR/root/.chushlogin
 set +Eeuo pipefail
 umask 0022
 EOM
-printf "%s\\n" "$PROOTSTMNT /bin/bash -lc \"\$AR2AR\" ||:" >> "$STARTBIN"
+printf "%s\\n" "$PROOTSTMNT /bin/bash -lc \"\$2\" ||:" >> "$STARTBIN"
 cat >> "$STARTBIN" <<- EOM
 set -Eeuo pipefail
 printf '\033]2; $STARTBIN command 📲  \007'
 rm -f $INSTALLDIR/root/.chushlogin
-# [l[ogin] user|u[ser] user [options]] Login as user [plus options].  Use 'addauser user' first to create this user and the user's home directory.  This option is for installing and working with programs that build other programs, and for working with the 'git' command, but the 'git’ might not work as expected in all situations.
+# [l[ogin] user | u[ser] user [options]] Login as user [plus options].  Use 'addauser user' first to create this user and the user's home directory.  This option is for installing and working with programs that build other programs, and for working with the 'git' command, but the 'git’ might not work as expected in all situations.
 elif [[ "\${1//-}" = [Ll]* ]] || [[ "\${1//-}" = [Uu]* ]]
 then
 printf '\033]2; $STARTBIN login user [options] 📲  \007'
 set +Eeuo pipefail
 umask 0022
 EOM
-printf "%s\\n" "$PROOTSTMNTUU /bin/su - \"\$AR2AR\" ||:" >> "$STARTBIN"
+printf "%s\\n" "$PROOTSTMNTUU /bin/su - \"\$2\" ||:" >> "$STARTBIN"
 cat >> "$STARTBIN" <<- EOM
 set -Eeuo pipefail
 printf '\033]2; $STARTBIN command 📲  \007'
 rm -f $INSTALLDIR/root/.chushlogin
-# [el[ogin] user|eu[ser] user [options]] Login as user [plus options].  Use 'addauser user' first to create this user and the user's home directory.  This option is for working with programs that have already been installed, and for working with the 'git' command.
+# [el[ogin] user | eu[ser] user [options]] Login as user [plus options].  Use 'addauser user' first to create this user and the user's home directory.  This option is for working with programs that have already been installed, and for working with the 'git' command.
 elif [[ "\${1//-}" = e[Ll]* ]] || [[ "\${1//-}" = e[Uu]* ]]
 then
 printf '\033]2; $STARTBIN login user [options] 📲  \007'
 set +Eeuo pipefail
 umask 0022
 EOM
-printf "%s\\n" "$PROOTSTMNTU /bin/su - \"\$AR2AR\" ||:" >> "$STARTBIN"
+printf "%s\\n" "$PROOTSTMNTU /bin/su - \"\$2\" ||:" >> "$STARTBIN"
 cat >> "$STARTBIN" <<- EOM
 set -Eeuo pipefail
 printf '\033]2; $STARTBIN login user [options] 📲  \007'
@@ -343,7 +343,7 @@ printf '\033]2; $STARTBIN raw ARGS 📲  \007'
 set +Eeuo pipefail
 umask 0022
 EOM
-printf "%s\\n" "$PROOTSTMNT /bin/\"\$AR2AR\" ||:" >> "$STARTBIN"
+printf "%s\\n" "$PROOTSTMNT /bin/\"\$2\" ||:" >> "$STARTBIN"
 cat >> "$STARTBIN" <<- EOM
 set -Eeuo pipefail
 printf '\033]2; $STARTBIN raw ARGS 📲  \007'
@@ -381,11 +381,8 @@ chmod 700 "$STARTBIN"
 _MAKESYSTEM_() {
 _WAKELOCK_
 _CALLSYSTEM_
-_DOMAKESYSTEM_() {
 _MD5CHECK_
 _PRINTCU_
-}
-_TASPINNER_ clock & _DOMAKESYSTEM_ ; kill $!
 [[ "$KEEP" -ne 0 ]] && rm -f "$INSTALLDIR"/*.tar.gz "$INSTALLDIR"/*.tar.gz.md5 # set KEEP to 0 in file 'knownconfigurations.bash' after using either 'setupTermuxArch bloom' or 'setupTermuxArch manual' to keep the INSTALLDIR/*.tar.gz and INSTALLDIR/*.tar.gz.md5 files.
 _PRINTDONE_
 _PRINTCONFIGUP_
@@ -419,6 +416,7 @@ cd "$INSTALLDIR"
 _PREPROOTDIR_
 _SETLANGUAGE_
 _ADDADDS_
+_DOMODdotfiles_
 _MAKEFINISHSETUP_
 _MAKESETUPBIN_
 _MAKESTARTBIN_
@@ -427,11 +425,11 @@ _FIXOWNER_
 }
 
 _PREPROOT_() {
-if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX86_64" ]] || [[ "$CPUABI" = i386 ]]
+if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX86_64" ]] || [[ "$CPUABI" = i386 ]] || [[ "$IFILE" == *i686* ]]
 then
-proot --link2symlink -0 bsdtar -p -xf "$IFILE" --strip-components 1
+_TASPINNER_ clock & proot --link2symlink -0 bsdtar -p -xf "$IFILE" --strip-components 1 ; kill $!
 else
-proot --link2symlink -0 bsdtar -p -xf "$IFILE"
+_TASPINNER_ clock & proot --link2symlink -0 bsdtar -p -xf "$IFILE" ; kill $!
 fi
 }
 
@@ -474,7 +472,7 @@ fi
 fi
 "$USEREDIT" "$INSTALLDIR/etc/pacman.d/mirrorlist"
 fi
-"$INSTALLDIR/root/bin/setupbin.bash" || _PRINTPROOTERROR_
+$INSTALLDIR/root/bin/setupbin.bash || _PRINTPROOTERROR_
 }
 
 _SETLANGUAGE_() { # This function uses device system settings to set locale.  To generate locales in a preferred language, you can use "Settings > Language & Keyboard > Language" in Android; Then run 'setupTermuxArch r' for a quick system refresh to regenerate locales in your preferred language.
