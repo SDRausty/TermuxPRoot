@@ -161,9 +161,9 @@ cp "$INSTALLDIR/etc/pacman.d/mirrorlist" "$INSTALLDIR/etc/pacman.d/mirrorlist.$S
 printf "DONE\\n"
 if [[ $USERCOUNTRYCODE == us ]]
 then
-USERCOUNTRYCODE="com"
+USERCOUNTRYCODE="edu\/"
 fi
-CHSENMIR="$(grep -w http "$INSTALLDIR/etc/pacman.d/mirrorlist" | grep ^#S | grep -w "$USERCOUNTRYCODE" | awk 'sub(/^.{1}/,"")' | head -n 1)"
+CHSENMIR="$(grep -w http "$INSTALLDIR/etc/pacman.d/mirrorlist" | grep ^#S | grep "$USERCOUNTRYCODE" | awk 'sub(/^.{1}/,"")' | head -n 1)"
 printf "%s\\n" "$CHSENMIR" >> "$INSTALLDIR/etc/pacman.d/mirrorlist"
 printf "Choosing mirror '%s' in file '%s';  Continuing...\\n" "$CHSENMIR" "${INSTALLDIR##*/}/etc/pacman.d/mirrorlist"
 DOMIRLCR=0
@@ -361,16 +361,6 @@ printf "%s\\n" "$PROOTSTMNT /bin/bash -lc \"\${@:2}\" ||:" >> "$STARTBIN"
 cat >> "$STARTBIN" <<- EOM
 set -Eeuo pipefail
 rm -f "$INSTALLDIR/root/.chushlogin"
-## [l[ogin] user | u[ser] user] Login as user.
-elif [[ "\${1//-}" = [Ll]* ]] || [[ "\${1//-}" = [Uu]* ]]
-then
-printf '\033]2; TermuxArch $STARTBIN login %s 📲 :DONE 🏁 \007' "\$2"
-set +Eeuo pipefail
-umask 0022
-EOM
-printf "%s\\n" "$PROOTSTMNTU /bin/su - \"\$2\" ||:" >> "$STARTBIN"
-cat >> "$STARTBIN" <<- EOM
-set -Eeuo pipefail
 ## [el[ogin] user | eu[ser] user] Login as user.
 elif [[ "\${1//-}" = e[Ll]* ]] || [[ "\${1//-}" = e[Uu]* ]]
 then
@@ -379,6 +369,33 @@ set +Eeuo pipefail
 umask 0022
 EOM
 printf "%s\\n" "$PROOTSTMNTEU /bin/su - \"\$2\" ||:" >> "$STARTBIN"
+cat >> "$STARTBIN" <<- EOM
+set -Eeuo pipefail
+## [esu user command] Login as user and execute command.
+elif [[ "\${1//-}" = [Ee][Ss]* ]]
+then
+printf '\\033]2;%s\\007' "TermuxArch $STARTBIN esu \$2 \${@:3} 📲 : DONE 🏁"
+if [[ "\$2" = root ]]
+then
+printf "%s\\n" "Please use this command \"$STARTBIN c '\${@:3}'\" for the Arch Linux in Termux PRoot \$2 user account;  Exiting..."
+exit
+fi
+touch "$INSTALLDIR/home/\$2/.chushlogin"
+set +Eeuo pipefail
+umask 0022
+EOM
+printf "%s\\n" "$PROOTSTMNTEU /bin/su - \"\$2\" -c \"\${@:3}\"" >> "$STARTBIN"
+cat >> "$STARTBIN" <<- EOM
+set -Eeuo pipefail
+rm -f "$INSTALLDIR/home/\$2/.chushlogin"
+## [l[ogin] user | u[ser] user] Login as user.
+elif [[ "\${1//-}" = [Ll]* ]] || [[ "\${1//-}" = [Uu]* ]]
+then
+printf '\033]2; TermuxArch $STARTBIN login %s 📲 :DONE 🏁 \007' "\$2"
+set +Eeuo pipefail
+umask 0022
+EOM
+printf "%s\\n" "$PROOTSTMNTU /bin/su - \"\$2\" ||:" >> "$STARTBIN"
 cat >> "$STARTBIN" <<- EOM
 set -Eeuo pipefail
 ## [raw ARGS] Construct the 'startarch' proot statement.
@@ -411,7 +428,7 @@ rm -f "$INSTALLDIR/home/\$2/.chushlogin"
 else
 _PRINTUSAGE_
 fi
-# $STARTBIN EOF
+## $STARTBIN EOF
 EOM
 chmod 700 "$STARTBIN"
 }
@@ -433,7 +450,7 @@ if md5sum -c "$IFILE".md5 1>/dev/null
 then
 _PRINTMD5SUCCESS_
 printf "\\e[0;32m"
-_PREPROOT_
+_TASPINNER_ clock & _PREPROOT_ ; kill $! || _PRINTERRORMSG_ "_PREPROOT_ _MD5CHECK_ ${0##*/} necessaryfunctions.bash"
 else
 rm -f "$INSTALLDIR"/*.tar.gz "$INSTALLDIR"/*.tar.gz.md5
 _PRINTMD5ERROR_
@@ -465,9 +482,9 @@ _FIXOWNER_
 _PREPROOT_() {
 if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX86_64" ]] || [[ "$CPUABI" = i386 ]]
 then
-_TASPINNER_ clock & proot --link2symlink -0 bsdtar -p -xf "$IFILE" --strip-components 1 ; kill $!
+proot --link2symlink -0 bsdtar -p -xf "$IFILE" --strip-components 1 || _PRINTERRORMSG_ "proot _PREPROOT_ ${0##*/} necessaryfunctions.bash"
 else
-_TASPINNER_ clock & proot --link2symlink -0 bsdtar -p -xf "$IFILE" ; kill $!
+proot --link2symlink -0 bsdtar -p -xf "$IFILE" || _PRINTERRORMSG_ "proot _PREPROOT_ ${0##*} necessaryfunctions.bash"
 fi
 }
 
@@ -588,4 +605,4 @@ _RUNFINISHSETUP_
 rm -f root/bin/$BINFNSTP
 rm -f root/bin/setupbin.bash
 }
-# necessaryfunctions.bash EOF
+## necessaryfunctions.bash EOF

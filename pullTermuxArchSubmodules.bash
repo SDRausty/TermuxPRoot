@@ -53,7 +53,7 @@ _PRT_ "Checking checksums in direcory $(pwd) with sha512sum: "
 sha512sum -c --quiet sha512.sum 2>/dev/null || printf "%s\\n" "sha512sum -c sha512.sum FAILED!"
 _PRNT_  "DONE"
 else
-printf "%s\\n" "No file 'sha512.sum' found in directory $(pwd)."
+printf "%s\\n" "No 'sha512.sum' file found in directory $(pwd)."
 fi
 cd $RDR
 #	sleep 0."$(shuf -i 24-72 -n 1)" # latency support
@@ -76,4 +76,4 @@ OUNA="/TermuxArch"
 _GSA_ docs docsTermuxArch "" || printf "\\n\\n%s\\n" "Cannot add or update module docs : Continuing..."
 _GSA_ gen genTermuxArch "" || printf "\\n\\n%s\\n" "Cannot add or update module gen : Continuing..."
 _GSA_ scripts "scripts.TermuxArch" "" || printf "\\n\\n%s\\n" "Cannot add or update module scripts : Continuing..."
-# pullTermuxArchSubmodules.bash EOF
+## pullTermuxArchSubmodules.bash EOF
