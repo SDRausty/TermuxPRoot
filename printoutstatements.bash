@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Copyright 2017-2020 by SDRausty. All rights reserved.  🌎 🌍 🌏 🌐 🗺
-# Hosted sdrausty.github.io/TermuxArch courtesy https://pages.github.com
-# https://sdrausty.github.io/TermuxArch/README has info about this project.
-# https://sdrausty.github.io/TermuxArch/CONTRIBUTORS Thank you for your help.
-# printout statement subroutines for 'setupTermuxArch'
+## Copyright 2017-2021 by SDRausty. All rights reserved.  🌎 🌍 🌏 🌐 🗺
+## Hosted sdrausty.github.io/TermuxArch courtesy https://pages.github.com
+## https://sdrausty.github.io/TermuxArch/README has info about this project.
+## https://sdrausty.github.io/TermuxArch/CONTRIBUTORS Thank you for your help.
+## printout statement subroutines for 'setupTermuxArch'
 ################################################################################
 FLHDR0[0]="#!/usr/bin/env bash"
-FLHDR0[1]="# Copyright 2017-2020 by SDRausty. All rights reserved, see LICENSE 🌎 🌍 🌏"
+FLHDR0[1]="# Copyright 2017-2021 by SDRausty. All rights reserved, see LICENSE 🌎 🌍 🌏"
 FLHDR0[2]="# Hosting sdrausty.github.io/TermuxArch courtesy https://pages.github.com."
 FLHDR0[3]="# https://sdrausty.github.io/TermuxArch/README has info about this project."
 FLHDR0[4]="# https://sdrausty.github.io/TermuxArch/CONTRIBUTORS Thank you for your help."
@@ -15,7 +15,7 @@ FLHDR1[1]=""
 FLHDR1[2]="set -Eeuo pipefail"
 FLHDR1[3]="shopt -s nullglob globstar"
 FLHDR1[4]="unset LD_PRELOAD"
-FLHDR1[5]="VERSIONID=2.0.425"
+FLHDR1[5]="VERSIONID=2.0.435"
 FLHDR1[6]=""
 FLHDRP[0]="## BEGIN #####################################################################"
 FLHDRP[1]=""
@@ -228,6 +228,7 @@ fi
 }
 
 _PRINTPROOTERROR_() {
+printf "\\e[0;34m%s\\n\\n%s\\n\\n%s\\n\\n%s\\e[0m" "If error ' proot info: vpid 1: terminated with signal 11 ' is found, ensure that all the software is up to date.  After updating all software, including Android software, please reference these links in order to find a resolution if updating Termux app and Termux packages and Android device software was unsuccessful:" "  * https://github.com/termux/proot/issues?q=\"proot info: vpid 1: terminated with signal 11\"" "  * https://github.com/termux/termux-packages/issues?q=\"proot info: vpid 1: terminated with signal 11\""
 printf "\\e[0;34m%s\\n\\n%s\\n\\n%s\\n\\n%s\\e[0m" "If error ' env ... not found ' is found, ensure that all the software is up to date.  After updating, please reference these links in order to find a resolution if updating Termux app and Termux packages was unsuccessful:" "  * https://github.com/termux/proot/issues?q=\"env\"+\"not+found\"" "  * https://github.com/termux/termux-packages/issues?q=\"not+found\"+\"proot\""
 }
 
@@ -236,4 +237,4 @@ declare -g PRINTROOTDIR
 PRINTROOTDIR="$(printf "%s" "${ROOTDIR%/}"|sed 's#//*#/#g')"
 }
 _PRINTROOTDIRFUNCTION_
-## printoutstatements.bash EOF
+# printoutstatements.bash EOF

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Copyright 2017-2020 (c) by TermuxArch, all rights reserved, see LICENSE 🌎 🌍 🌏 🌐 🗺
-# https://termuxarch.github.io/TermuxArch courtesy host https://pages.github.com
-# update git repository, then update modules
+## Copyright 2017-2021 (c) by TermuxArch, all rights reserved, see LICENSE 🌎 🌍 🌏 🌐 🗺
+## https://termuxarch.github.io/TermuxArch courtesy host https://pages.github.com
+## update git repository, then update modules
 ################################################################################
 set -Eeuo pipefail
 
@@ -71,9 +71,9 @@ git pull || printf "\\n\\n%s\\n" "Cannot git pull : Continuing..."
 sha512sum -c --quiet sha512.sum || _PRNT_ "WARNING:  Checking checksums in direcory $(pwd) with sha512sum FAILED! "
 SIAD="$(grep url .git/config|cut -d"=" -f 2|head -n 1|cut -d"/" -f 2-3)"
 OUNA="/shlibs"
-_GSA_ "\.scripts/maintenance" maintenance "" || printf "\\n\\n%s\\n" "Cannot add or update module .scripts/maintenance : Continuing..."
+_GSA_ ".scripts/maintenance" maintenance "" || printf "\\n\\n%s\\n" "Cannot add or update module .scripts/maintenance : Continuing..."
 OUNA="/TermuxArch"
 _GSA_ docs docsTermuxArch "" || printf "\\n\\n%s\\n" "Cannot add or update module docs : Continuing..."
 _GSA_ gen genTermuxArch "" || printf "\\n\\n%s\\n" "Cannot add or update module gen : Continuing..."
 _GSA_ scripts "scripts.TermuxArch" "" || printf "\\n\\n%s\\n" "Cannot add or update module scripts : Continuing..."
-## pullTermuxArchSubmodules.bash EOF
+# pullTermuxArchSubmodules.bash EOF

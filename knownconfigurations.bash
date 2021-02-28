@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Copyright 2017-2020 by SDRausty. All rights reserved.  🌎 🌍 🌏 🌐 🗺
-# Hosted sdrausty.github.io/TermuxArch courtesy https://pages.github.com
-# https://sdrausty.github.io/TermuxArch/README has info about this project.
-# https://sdrausty.github.io/TermuxArch/CONTRIBUTORS Thank you for your help.
+## Copyright 2017-2021 by SDRausty. All rights reserved.  🌎 🌍 🌏 🌐 🗺
+## Hosted sdrausty.github.io/TermuxArch courtesy https://pages.github.com
+## https://sdrausty.github.io/TermuxArch/README has info about this project.
+## https://sdrausty.github.io/TermuxArch/CONTRIBUTORS Thank you for your help.
 ################################################################################
 ##  Running 'setupTermuxArch manual' will create 'setupTermuxArchConfigs.bash' from this file in the working directory.  Run 'setupTermuxArch' and file 'setupTermuxArchConfigs.bash' loads automaticaly once created, and this file is ignored at runtime; 'setupTermuxArch help' has additional information.  The mirror (information at https://wiki.archlinux.org/index.php/Mirrors and https://archlinuxarm.org/about/mirrors) can be changed to a desired geographic location in 'setupTermuxArchConfigs.bash' to resolve download, 404 and checksum issues should these take place.  User configurable variables are present in this file for your convenience:
 # DMVERBOSE="-v" 	##  uncomment for verbose download tool output with curl and wget;  For verbose output throughout runtime change this setting in file 'setupTermuxArch' also.
@@ -146,4 +146,4 @@ _PR00TSTRING_
 ##  uncomment the next line to test function _PR00TSTRING_
 ##  printf "\\n%s\\n" "PROOTSTMNT string [root]:" && printf "%s\\n\\n" "${PROOTSTMNT:-}" && printf "%s\\n" "PROOTSTMNTC string [root command]:" && printf "%s\\n\\n" "${PROOTSTMNTU:-}" && printf "%s\\n" "PROOTSTMNTEU string [elogin]:" && printf "%s\\n\\n" "${PROOTSTMNTU:-}" && printf "%s\\n" "PROOTSTMNTU string [login]:" && printf "%s\\n\\n" "${PROOTSTMNTU:-}" && printf "%s\\n" "PROOTSTMNTPRTR string [raw]:" && printf "%s\\n\\n" "${PROOTSTMNT:-}" && printf "%s\\n" "PROOTSTMNTPSLC string [su login command]:" && printf "%s\\n\\n" "${PROOTSTMNT:-}" && exit
 ##  The commands 'setupTermuxArch r[e[fresh]]' can be used to regenerate the start script to the newest version if there is a newer version published and can be customized as wanted.  Command 'setupTermuxArch refresh' will refresh the installation globally, including excecuting 'keys' and 'locales-gen' and backup user configuration files that were initially created and are refreshed.  The command 'setupTermuxArch re' will refresh the installation and update user configuration files and backup user configuration files that were initially created and are refreshed.  Command 'setupTermuxArch r' will only refresh the installation and update the root user configuration files and backup root user configuration files that were initially created and are refreshed.
-## knownconfigurations.bash EOF
+# knownconfigurations.bash EOF

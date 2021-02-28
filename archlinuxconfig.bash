@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Copyright 2017-2020 by SDRausty. All rights reserved.  🌎 🌍 🌏 🌐 🗺
-# Hosted sdrausty.github.io/TermuxArch courtesy https://pages.github.com
-# https://sdrausty.github.io/TermuxArch/README has info about this project.
-# https://sdrausty.github.io/TermuxArch/CONTRIBUTORS Thank you for your help.
+## Copyright 2017-2021 by SDRausty. All rights reserved.  🌎 🌍 🌏 🌐 🗺
+## Hosted sdrausty.github.io/TermuxArch courtesy https://pages.github.com
+## https://sdrausty.github.io/TermuxArch/README has info about this project.
+## https://sdrausty.github.io/TermuxArch/CONTRIBUTORS Thank you for your help.
 ################################################################################
 _ADDAUSER_() {
 _CFLHDR_ usr/local/bin/addauser "# add Arch Linux in Termux PRoot user"
@@ -44,11 +44,6 @@ chmod 775 "/home/\$1"
 chown -R "\$1:\$1" "/home/\$1"
 sed -i "s/\$1:x/\$1:/g" /etc/passwd
 printf "\\\\e[0;32m%s\\\\e[1;32m%s\\\\e[0;32m%s\\\\e[1;32m%s\\\\e[0;32m%s\\\\e[1;32m%s\\\\e[0;32m%s\\\\e[1;32m%s\\\\e[0;32m%s\\\\e[0m\\\\n" "Added Arch Linux in Termux PRoot user " "'\$1'" " and configured user '\$1' for use with the Arch Linux command 'sudo'.  Created Arch Linux user \$1's home directory in /home/\$1.  To use this account run " "'$STARTBIN login \$1'" " from the shell in Termux.  To add user accounts you can use " "'addauser \$1'" " in Arch Linux and " "'$STARTBIN c[ommand] addauser \$1'" " in the default Termux shell.  Please do not nest proot in proot by using '$STARTBIN' in '$STARTBIN' as this is known to cause issues for users of PRoot."
-cd "/home/\$1"
-if [ ! -e txhome ]
-then
-ln -s "$HOME" txhome || printf "%s\\n" "Symlink error; Continuing"
-fi
 }
 _PMFSESTRING_() {
 printf "\\\\e[1;31m%s\\\\e[1;37m%s\\\\e[1;32m%s\\\\e[1;37m%s\\\\n\\\\n" "Signal generated in '\$1' : Cannot complete task : " "Continuing..."
@@ -139,31 +134,15 @@ fi
 }
 
 _DONEAURHELPER_(){
-echo echo
-echo echo
 #command "\$1" || _DOAURHELPERS_
-if ! command "\$1" || echo whats diz whats diz whats diz whats diz whats diz whats diz whats diz whats diz
+if ! command "\$1"
 then
-printf '%s\n' "Found command \$1"
-printf '%s\n' "Found command \$1"
-printf '%s\n' "Found command \$1"
 printf '%s\n' "Found command \$1"
 if printf '%s\n' "\${AURHELPERS[@]}" | grep -q -P "^\$1$"
 then
-echo echo
-echo echo
-echo \$1
-echo echo
-echo echo
-echo echo
-echo echo
-echo \$1
-echo echo
-echo echo
+printf '%s\n' "\$1"
 fi
 fi
-echo echo
-echo echo
 }
 
 _DOAURHELPERS_(){
@@ -215,7 +194,7 @@ AURHELPERS=(aurutils bauerbill pacaur pakku paru pbget pikaur-git pkgbuilder puy
 fi
 # command yay || makeyay
 echo _DONEAURHELPER_ pikaur
-_DONEAURHELPER_ pikaur
+# _DONEAURHELPER_ pikaur
 # _DOAURHELPERS_
 ## makeaurhelpers EOF
 EOM
@@ -244,7 +223,6 @@ rm -f "\$HOME"/.chushlogin
 fi
 PS1="[\[\e[38;5;148m\]\u\[\e[1;0m\]\A\[\e[1;38;5;112m\]\W\[\e[0m\]]$ "
 export GPG_TTY="\$(tty)"
-export TZ="$(getprop persist.sys.timezone)"
 EOM
 for i in "${!LC_TYPE[@]}"
 do
@@ -252,6 +230,7 @@ printf "%s=\"%s\"\\n" "export ${LC_TYPE[i]}" "$ULANGUAGE.UTF-8" >> root/.bash_pr
 done
 [[ -f "$HOME"/.bash_profile ]] && grep proxy "$HOME"/.bash_profile | grep -s "export" >> root/.bash_profile ||:
 cat >> root/.bash_profile <<- EOM
+export TZ="$(getprop persist.sys.timezone)"
 ## .bash_profile EOF
 EOM
 }
@@ -311,6 +290,8 @@ alias PCSS='pacman -Ss --color=always'
 alias pcss='pacman -Ss --color=always'
 alias Q='exit'
 alias q='exit'
+alias V='v'
+alias v='v'
 alias UM='uname -m'
 alias um='uname -m'
 EOM
@@ -446,6 +427,20 @@ printf "\\\\e[0;33m%s\\\\n\\\\e[0m" "\$USRSPACE \$DFUNIT of free user space is a
 ## dfa EOF
 EOM
 chmod 700 usr/local/bin/dfa
+}
+
+_ADDes_() {
+_CFLHDR_ usr/local/bin/es
+cat >> usr/local/bin/es <<- EOM
+if [[ -z "\${1:-}" ]]
+then
+ARGS=(".")
+else
+ARGS=("\$@")
+fi
+EOM
+printf "%s\\n%s\\n%s\\n" "[ \"\$UID\" = 0 ] && printf \"\\e[1;31m%s\\e[1;37m%s\\e[1;31m%s\\n\" \"Cannot run '\${0##*/}' as root user :\" \" the command 'addauser username' creates user accounts in $INSTALLDIR : the command '$STARTBIN command addauser username' can create user accounts in $INSTALLDIR from Termux : a default user account is created during setup : the default username 'user' can be used to access the PRoot system employing a user account : command '$STARTBIN help' has more information : \" \"exiting...\" && exit" "[ ! -x \"\$(command -v emacs)\" ] && pci emacs && emacs \"\${ARGS[@]}\" || emacs \"\${ARGS[@]}\"" "## v EOF" >> usr/local/bin/es
+chmod 700 usr/local/bin/es
 }
 
 _ADDexd_() {
@@ -1515,4 +1510,4 @@ MOTTECGIT="github.com/archlinuxarm"
 MOTTECIRC="archlinuxarm.org/about/contact"
 fi
 }
-## archlinuxconfig.bash EOF
+# archlinuxconfig.bash EOF
