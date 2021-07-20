@@ -104,7 +104,7 @@ if [[ "${QEMUCR:-}" == 0 ]]
 then
 PROOTSTMNT+="-q $PREFIX/bin/qemu-$ARCHITEC "
 fi
-[[ "$SYSVER" -ge 10 ]] && PROOTSTMNT+="-b /apex:/apex "
+[[ "$SYSVER" -ge 10 ]] && PROOTSTMNT+="-b /apex -b /storage  -b /sys -b /system -b /vendor "
 ##  Function _PR00TSTRING_ which creates the PRoot init statement PROOTSTMNT uses associative arrays.  Page https://www.gnu.org/software/bash/manual/html_node/Arrays.html has information about BASH arrays and is also available at https://www.gnu.org/software/bash/manual/ this link.
 declare -A PRSTARR # associative array
 # populate writable binds
@@ -117,7 +117,7 @@ PROOTSTMNT+="-b $PRBIND:$PRBIND "
 fi
 done
 # populate readable binds
-PRSTARR=(["$EXTERNAL_STORAGE"]="$EXTERNAL_STORAGE" ["$HOME"]="$HOME" ["$PREFIX"]="$PREFIX" [/data/dalvik-cache/]=/data/dalvik-cache/ [/dev/]=/dev/ [/dev/urandom]=/dev/random [/linkerconfig/ld.config.txt]=/linkerconfig/ld.config.txt [/plat_property_contexts]=/plat_property_contexts [/proc/]=/proc/ [/proc/self/fd]=/dev/fd [/proc/self/fd/0]=/dev/stdin [/proc/self/fd/1]=/dev/stdout [/proc/self/fd/2]=/dev/stderr [/proc/stat]=/proc/stat [/property_contexts]=/property_contexts [/storage/]=/storage/ [/sys/]=/sys/ [/system/]=/system/ [/vendor/]=/vendor/)
+PRSTARR=(["$EXTERNAL_STORAGE"]="$EXTERNAL_STORAGE" ["$HOME"]="$HOME" ["$PREFIX"]="$PREFIX" [/data/dalvik-cache/]=/data/dalvik-cache/ [/dev/]=/dev/ [/dev/urandom]=/dev/random [/linkerconfig/ld.config.txt]=/linkerconfig/ld.config.txt [/plat_property_contexts]=/plat_property_contexts [/proc/]=/proc/ [/proc/self/fd]=/dev/fd [/proc/self/fd/0]=/dev/stdin [/proc/self/fd/1]=/dev/stdout [/proc/self/fd/2]=/dev/stderr [/proc/stat]=/proc/stat [/property_contexts]=/property_contexts)
 for PRBIND in ${!PRSTARR[@]}
 do
 if [[ -r "$PRBIND" ]]	# is readable
@@ -126,7 +126,7 @@ PROOTSTMNT+="-b $PRBIND:${PRSTARR[$PRBIND]} "
 fi
 done
 # populate NOT readable binds
-PRSTARR=([/dev/]=/dev/ [/dev/ashmem]="$INSTALLDIR/tmp" [/dev/shm]="$INSTALLDIR/tmp" [/proc/stat]="$INSTALLDIR/var/binds/fbindprocstat" [/sys/]=/sys/ [/proc/uptime]="$INSTALLDIR/var/binds/fbindprocuptime")
+PRSTARR=([/dev/]=/dev/ [/dev/ashmem]="$INSTALLDIR/tmp" [/dev/shm]="$INSTALLDIR/tmp" [/proc/stat]="$INSTALLDIR/var/binds/fbindprocstat" [/proc/uptime]="$INSTALLDIR/var/binds/fbindprocuptime")
 for PRBIND in ${!PRSTARR[@]}
 do
 if [[ ! -r "$PRBIND" ]]	# is not readable
@@ -134,12 +134,11 @@ then	# add proot bind
 PROOTSTMNT+="-b ${PRSTARR[$PRBIND]}:$PRBIND "
 fi
 done
-PROOTSTMNT+="-w /root /usr/bin/env -i HOME=/root TERM=\"$TERM\" TMPDIR=/tmp ANDROID_DATA=/data "
+PROOTSTMNT+="-b /data/data/com.termux/files/usr/tmp:/tmp -w /root /usr/bin/env -i HOME=/root TERM=\"$TERM\" TMPDIR=/tmp ANDROID_DATA=/data "
 PROOTSTMNTU="${PROOTSTMNT//HOME=\/root/HOME=\/home\/\$2}"
 PROOTSTMNTU="${PROOTSTMNTU//-0 }"
 PROOTSTMNTU="${PROOTSTMNTU//-w \/root/-w \/home\/\$2}" # PRoot user string with link2symlink option enabled
 PROOTSTMNTEU="${PROOTSTMNTU//--link2symlink }" # PRoot user string with link2symlink option disabled
-PROOTSTMNTU="${PROOTSTMNTU//--sysvipc }" # PRoot user string with sysipc option disabled
 PROOTSTMNT="${PROOTSTMNT//-i \"\$2:wheel\" }" # PRoot root user string
 }
 _PR00TSTRING_
