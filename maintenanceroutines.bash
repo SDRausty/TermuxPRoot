@@ -24,44 +24,53 @@ IFILE="${GFILE##*/}"
 }
 
 _DOFUNLCR2_() {
-BKPDIR="$INSTALLDIR/var/backups/${INSTALLDIR##*/}/home/$USER"
-_BKPTHF_() { # backup the user files
-[[ ! -d "$BKPDIR/" ]] && mkdir -p "$BKPDIR/"
-cd "$INSTALLDIR/home/$USER" || exit 169
-[[ -f $1 ]] && printf "\\e[1;32m==>\\e[0;32m %s" "File '/${INSTALLDIR##*/}/home/$USER/$1' backed up to /${INSTALLDIR##*/}/var/backups/${INSTALLDIR##*/}/home/$USER/$1.$SDATE.bkp" && cp "$1" "$BKPDIR/$1.$SDATE.bkp" || _PSGI1ESTRING_ "cp '$1' if found maintenanceroutines.bash ${0##*/}"
+_BKPTHF_() { # backup file to backup file directory
+cp "$INSTALLDIR/home/$TALUSER/$DOFLNAME" "$BKPDIR/$DOFLNAME.$SDATE.bkp" && printf "\\e[0;32mFile '%s' backed up to '\\e[1;32m%s\\e[0;32m'.  " "$INSTALLDIR/home/$TALUSER/$DOFLNAME" "$BKPDIR/$DOFLNAME.$SDATE.bkp"
 }
-if [ -d "$INSTALLDIR/home" ]
+_CPYFRT_() { # copy file from root login to user
+cp "$INSTALLDIR/root/$DOFLNAME" "$INSTALLDIR/home/$TALUSER/" && printf "\\e[0;32mFile '%s' copied to '\\e[1;32m%s\\e[0;32m'.  " "${INSTALLDIR##*/}/root/$DOFLNAME" "${INSTALLDIR##*/}/home/$TALUSER/$DOFLNAME"
+}
+BKPDIR="$INSTALLDIR/var/backups/${INSTALLDIR##*/}/home/$TALUSER"
+[[ ! -d "$BKPDIR" ]] && mkdir -p "$BKPDIR"
+if [[ "$TALUSER" != alarm ]]
 then
-if [[ "$USER" != alarm ]]
-then
-export "$USER"
-DOFLIST=(.bash_profile .bashrc .gitconfig .vimrc)
-for DOFLNAME in "${DOFLIST[@]}"
+DOFLIST_=(.bash_profile .bashrc .cshrc .emacsrc .gitconfig .initrc .inputrc .vimrc .profile .zshrc)
+for DOFLNAME in "${DOFLIST_[@]}"
 do
-_BKPTHF_ "$DOFLNAME"
-cp "$INSTALLDIR/root/$DOFLNAME" "$INSTALLDIR/home/$USER/"
-printf "\\n\\e[0;32mCopied file %s to \\e[1;32m%s\\e[0;32m.\\e[0m\\n" "/${INSTALLDIR##*/}/root/$DOFLNAME" "/${INSTALLDIR##*/}/home/$USER/$DOFLNAME"
+printf "\\n\\e[0;32mProcessing user \\e[1;32m%s\\e[0;32m file \\e[1;32m%s\\e[0;32m.  " "$TALUSER" "$DOFLNAME"
+if [ -f "$INSTALLDIR/root/$DOFLNAME" ] && [ -f "$INSTALLDIR/home/$TALUSER/$DOFLNAME" ]
+then
+diff "$INSTALLDIR/root/$DOFLNAME" "$INSTALLDIR/home/$TALUSER/$DOFLNAME" 1>/dev/null || { _BKPTHF_ && _CPYFRT_ ; }
+elif [ -f "$INSTALLDIR/root/$DOFLNAME" ] && [ ! -f "$INSTALLDIR/home/$TALUSER/$DOFLNAME" ]
+then
+_CPYFRT_
+fi
 done
 fi
-fi
-cd "$INSTALLDIR/root" || exit 169
 }
 
 _DOTHRF_() { # do the root user files
-if [[ "${LCR:-}" -eq 3 ]] || [[ "${LCR:-}" -eq 4 ]] 	# LCR equals 3 or 4
-then	# do nothing
-:
-else
-[[ -f $1 ]] && (printf "\\e[1;32m%s\\e[0;32m%s\\e[0m\\n" "==>" " cp $1 /var/backups/${INSTALLDIR##*/}/$1.$SDATE.bkp" && cp "$1" "$INSTALLDIR/var/backups/${INSTALLDIR##*/}/$1.$SDATE.bkp") || printf "%s" "copy file '$1' if found; file not found; continuing; "
-fi
+[[ -f $1 ]] && { printf "\\e[1;32m%s\\e[0;32m%s\\e[0m\\n" "==>" " cp $1 /var/backups/${INSTALLDIR##*/}/$1.$SDATE.bkp" && cp "$1" "$INSTALLDIR/var/backups/${INSTALLDIR##*/}/$1.$SDATE.bkp" ; } || printf "%s" "copy file '$1' if found; file not found; continuing; "
 }
 
-_FUNLCR2_() { # copy from root to home/USER
-export FLCRVAR=($(ls "$INSTALLDIR/home/"))
-for USER in ${FLCRVAR[@]}
+_FUNLCR2_() { # copy from root to home
+export FLCRVAR=($(ls home/))
+for TALUSER in "${FLCRVAR[@]}"
 do
 _DOFUNLCR2_
 done
+}
+
+_DOUSECACHEDIR_() {
+if [ "$USECACHEDIR" = 0 ]
+then
+printf '\e[0;32mPopulating from cache files;  \e[1;32mBEGUN\n'
+{ cd "$CACHEDIR" 2>/dev/null && printf '%s' "cd $CACHEDIR && " ; } || { cd "$PREFIXDATAFILES" && mkdir -p "$CACHEDIRSUFIX" && cd "$CACHEDIR" && printf '%s' "cd $PREFIXDATAFILES && mkdir -p $CACHEDIRSUFIX && cd $CACHEDIR && " ; } || exit 196
+printf '%s\n' "cp -fr * $INSTALLDIR"
+cp -fr * "$INSTALLDIR"
+cd "$INSTALLDIR" && printf '%s\n' "cd $INSTALLDIR" || exit 196
+printf '\e[0;32mPopulating from cache files;  \e[1;32mDONE\n\n'
+fi
 }
 
 _LOADIMAGE_() {
@@ -88,16 +97,16 @@ _PRINTSTARTBIN_USAGE_
 exit
 }
 
-_FIXOWNER_() { # fix owner of INSTALLDIR/home/USER, PR9 by @petkar
+_FIXOWNER_() { # fix owner of INSTALLDIR/home/TALUSER, PR9 by @petkar
 _DOFIXOWNER_() {
 printf "\\e[0;32m%s" "Adjusting ownership and permissions:  "
 FXARR="$(ls "$INSTALLDIR/home")"
-for USER in ${FXARR[@]}
+for TALUSER in ${FXARR[@]}
 do
-if [[ "$USER" != alarm ]]
+if [[ "$TALUSER" != alarm ]]
 then
-$STARTBIN c "chmod 777 $INSTALLDIR/home/$USER"
-$STARTBIN c "chown -R $USER:$USER $INSTALLDIR/home/$USER"
+$STARTBIN c "chmod 777 $INSTALLDIR/home/$TALUSER"
+$STARTBIN c "chown -R $TALUSER:$TALUSER $INSTALLDIR/home/$TALUSER"
 fi
 done
 printf "\\e[0;32m%s\\e[0m\\n" "DONE"
@@ -115,6 +124,7 @@ _SETLANGUAGE_
 _PREPROOTDIR_ || _PSGI1ESTRING_ "_PREPROOTDIR_ _REFRESHSYS_ maintenanceroutines.bash ${0##*/}"
 _ADDADDS_
 printf '\e[0;32mGenerating dot files;  \e[1;32mDONE\n'
+_DOUSECACHEDIR_
 _MAKEFINISHSETUP_
 _MAKESETUPBIN_
 _MAKESTARTBIN_
@@ -134,30 +144,12 @@ ls "$INSTALLDIR"/root/.vimrc | cut -f7- -d /
 ls "$INSTALLDIR"/root/.gitconfig | cut -f7- -d /
 printf "\\n\\e[1;32m%s\\n\\e[0;32m" "Files updated to the newest version $VERSIONID in directory ~/${INSTALLDIR##*/}/usr/local/bin/:"
 ls "$INSTALLDIR/usr/local/bin/"
-_SHFUNC_ () {
-_SHFDFUNC_ () {
-SHFD="$(find "$RMDIR" -type d -printf '%03d %p\n' | sort -r -n -k 1 | cut -d" " -f 2)"
-for SHF1D in $SHFD
-do
-rmdir "$SHF1D" || printf "%s" "Cannot 'rmdir $SHF1D'; Continuing..."
-done
-}
-printf "%s\n" "Script '${0##*/}' checking and fixing permissions in directory '$PWD': STARTED..."
-SDIRS="apex data host-rootfs sdcard storage system vendor"
-for SDIR in $SDIRS
-do
-RMDIR="$INSTALLDIR/$SDIR"
-[ -d "$RMDIR" ] && { chmod 755 "$RMDIR" ; printf "%s" "Deleting superfluous '$RMDIR' directory: " && (rmdir "$RMDIR" || _SHFDFUNC_) && printf "%s\n" "Continuing..." ; }
-done
-PERRS="$(du "$INSTALLDIR" 2>&1 >/dev/null ||:)"
-PERRS="$(sed "s/du: cannot read directory '//g" <<< "$PERRS" | sed "s/': Permission denied//g")"
-[ -z "$PERRS" ] || { printf "%s" "Fixing  permissions in '$INSTALLDIR': " && for PERR in $PERRS ; do chmod 777 "$PERR" ; done && printf "%s\n" "DONE" ; } || printf "%s" "Fixing  permissions signal PERRS; Continuing..."
-printf "%s\n" "Script '${0##*/}' checking and fixing permissions: DONE"
-}
-[ "$LCR" = 4 ] && [ -d "$INSTALLDIR" ] && _SHFUNC_ "$@"
-if [[ "${LCR:-}" = 2 ]]
+if [[ "${LCR:-}" = 2 ]] || [[ "${LCR:-}" = 3 ]] || [[ "${LCR:-}" = 4 ]] || [[ "${LCR:-}" = 5 ]]
 then
 _FUNLCR2_
+_SHFUNCWRAP_
+else
+printf "\\n\\e[0;32mIn order to refresh user directories, please use '\\e[1;32m%s re[fresh]\\e[0;32m'.  " "${0##*/}"
 fi
 printf "\\n"
 _COPYSTARTBIN2PATH_
@@ -169,6 +161,45 @@ set -Eeuo pipefail
 _PRINTFOOTER2_
 _PRINTSTARTBIN_USAGE_
 exit
+}
+
+_SHFUNC_ () {
+_SHFDFUNC_ () {
+SHFD="$(find "$RMDIR" -type d -printf '%03d %p\n' | sort -r -n -k 1 | cut -d" " -f 2)"
+for SHF1D in $SHFD
+do
+rmdir "$SHF1D" || printf "%s" "Cannot 'rmdir $SHF1D'; Continuing..."
+done
+}
+printf "\n%s\n" "Script '${0##*/}' checking and fixing permissions in directory '$PWD': STARTED..."
+SDIRS="apex data host-rootfs sdcard storage system vendor"
+for SDIR in $SDIRS
+do
+RMDIR="$INSTALLDIR/$SDIR"
+[ -d "$RMDIR" ] && { chmod 755 "$RMDIR" ; printf "%s" "Deleting superfluous '$RMDIR' directory: " && (rmdir "$RMDIR" || _SHFDFUNC_) && printf "%s\n" "Continuing..." ; }
+done
+PERRS="$(du "$INSTALLDIR" 2>&1 >/dev/null ||:)"
+PERRS="$(sed "s/du: cannot read directory '//g" <<< "$PERRS" | sed "s/': Permission denied//g")"
+[ -z "$PERRS" ] || { printf "%s" "Fixing  permissions in '$INSTALLDIR': " && for PERR in $PERRS ; do chmod 777 "$PERR" ; done && printf "%s\n" "DONE" ; } || printf "%s" "Fixing  permissions signal PERRS; Continuing..."
+printf "%s\n" "Script '${0##*/}' checking and fixing permissions: DONE"
+}
+
+_SHFUNCWRAP_ () {
+if [[ "${LCR:-}" -eq 3 ]] || [[ "${LCR:-}" -eq 4 ]] || [[ "${LCR:-}" -eq 5 ]]
+then
+FNDTMPROOT=($(ls "$TMPDIR"/))
+if [ ${#FNDTMPROOT[@]} = 0 ]
+then
+_SHFUNC_ "$@"
+else
+if [ ${#FNDTMPROOT[@]} = 1 ]
+then
+printf "\\n\\e[0;32mFound %s open PRoot session;  Not checking for errors." "${#FNDTMPROOT[@]}"
+else
+printf "\\n\\e[0;32mFound %s open PRoot sessions;  Not checking for errors." "${#FNDTMPROOT[@]}"
+fi
+fi
+fi
 }
 
 _SPACEINFO_() {
