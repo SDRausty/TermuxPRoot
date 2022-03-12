@@ -5,17 +5,6 @@
 ## https://sdrausty.github.io/TermuxArch/CONTRIBUTORS Thank you for your help.
 ################################################################################
 
-[ "$CPUABI" = i386 ] && CPUABI="x86"
-CACHECPBI="${CPUABI/_/-}"
-CACHEDIRPKG="/storage/emulated/0/Android/data/com.termux/files/cache/archlinux/$CACHECPBI/var/cache/pacman/pkg/"
-CACHEDIR="/storage/emulated/0/Android/data/com.termux/files/cache/archlinux/$CACHECPBI/"
-PREFIXDATAFILES="/storage/emulated/0/Android/data/com.termux/"
-CACHEDIRSUFIX="files/cache/archlinux/$CACHECPBI/var/cache/pacman/pkg/"
-BINFNSTP="finishsetup.bash"
-LC_TYPE=("LANG" "LANGUAGE" "LC_ADDRESS" "LC_COLLATE" "LC_CTYPE" "LC_IDENTIFICATION" "LC_MEASUREMENT" "LC_MESSAGES" "LC_MONETARY" "LC_NAME" "LC_NUMERIC" "LC_PAPER" "LC_TELEPHONE" "LC_TIME")
-TXPRQUON="Termux PRoot with QEMU"
-TXPRQUON="Termux PRoot"
-
 _CALLSYSTEM_() {
 declare COUNTER=""
 if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX8664" ]] || [[ "$CPUABI" = "${CPUABIX8664//_/-}" ]] || [[ "$CPUABI" = i386 ]]
@@ -171,7 +160,7 @@ exit
 
 _MAKESYSTEM_() {
 _WAKELOCK_
-if [ "$USECACHEDIR" = 0 ]
+if [ "$USECACHEDIR" = 0 ] && [[ -z "${LCR:-}" ]]
 then
 printf '\e[0;32mPopulating from cache files;  \e[1;32mBEGUN\n'
 { cd "$CACHEDIR" 2>/dev/null && printf '%s' "cd $CACHEDIR && " ; } || { cd "$PREFIXDATAFILES" && mkdir -p "$CACHEDIRSUFIX" && cd "$CACHEDIR" && printf '%s' "cd $PREFIXDATAFILES && mkdir -p $CACHEDIRSUFIX && cd $CACHEDIR && " ; } || exit 196
@@ -212,12 +201,11 @@ fi
 fi
 }
 
-_PREPROOTDIR_() {
-# create local array of directories to be created for setupTermuxArch
+_PREPROOTDIR_() { # create local array of directories to be created by setupTermuxArch
 local DRARRLST=("etc" "home" "root/bin" "usr/bin" "usr/local/bin" "usr/local/termuxarch/bin" "var/backups/${INSTALLDIR##*/}/etc" "var/backups/${INSTALLDIR##*/}/root" "var/binds")
 for ISDIR in ${DRARRLST[@]}
 do
-( [[ ! -d "$ISDIR" ]] && printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[0m\\n" "Creating directory " "'/$ISDIR'" "." && mkdir -p "$ISDIR" ) || printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[0m\\n" "Directory " "'/$ISDIR'" " exists; Continuing:"
+{ [ -d "$ISDIR" ] || printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[0m\\n" "Creating directory " "'/$ISDIR'" "." && mkdir -p "$ISDIR" ; } || printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[0m\\n" "Directory " "/$ISDIR" " exists.  "
 done
 }
 
@@ -227,7 +215,7 @@ _PREPROOTDIR_
 _SETLANGUAGE_
 _ADDADDS_
 _DOMODdotfiles_
-printf '\e[0;32mGenerating dot files;  \e[1;32mDONE\n'
+printf '\e[0;32mGenerating dot files:  \e[1;32mDONE\n'
 _MAKEFINISHSETUP_
 _MAKESETUPBIN_
 _MAKESTARTBIN_
@@ -306,8 +294,6 @@ _ADDmotd_
 _PREPPACMANCONF_ || :
 _SETLOCALE_
 _RUNFINISHSETUP_
-rm -f root/bin/"$BINFNSTP"
-rm -f root/bin/setupbin.bash
 [ -f root/bin/"$BINFNSTP" ] && rm -f root/bin/"$BINFNSTP"
 [ -f root/bin/setupbin.bash ] && rm -f root/bin/setupbin.bash
 printf "\\n\\e[1;34m%s  \\e[0m\\n\\n" "🕛 > 🕤 Arch Linux in Termux is installed and configured 📲  "

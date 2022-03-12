@@ -8,7 +8,7 @@ set -Eeuo pipefail
 _SGSATRPERROR_() { # run on script error signal
 local RV="$?"
 printf "\\n%s\\n" "$RV"
-printf "\\e[?25h\\n\\e[1;48;5;138mBuildAPKs %s ERROR:  Generated script error %s near or at line number %s by \`%s\`!\\e[0m\\n" "updateTermuxArch.bash" "${3:-VALUE}" "${1:-LINENO}" "${2:-BASH_COMMAND}"
+printf "\\e[?25h\\n\\e[1;48;5;138mBuildAPKs %s ＴｅｒｍｕｘＡｒｃｈ SIGNAL:  Generated script error %s near or at line number %s by \`%s\`!\\e[0m\\n" "updateTermuxArch.bash" "${3:-VALUE}" "${1:-LINENO}" "${2:-BASH_COMMAND}"
 exit 179
 }
 
@@ -20,13 +20,13 @@ exit
 
 _SGSATRPSIGNAL_() { # run on signal
 local RV="$?"
-printf "\\e[?25h\\e[1;7;38;5;0mBuildAPKs %s WARNING:  Signal %s received!\\e[0m\\n" "updateTermuxArch.bash" "$RV"
+printf "\\e[?25h\\e[1;7;38;5;0mＴｅｒｍｕｘＡｒｃｈ %s NOTICE:  Signal %s received!\\e[0m\\n" "${0##*/}" "$RV"
 exit 178
 }
 
 _SGSATRPQUIT_() { # run on quit signal
 local RV="$?"
-printf "\\e[?25h\\e[1;7;38;5;0mBuildAPKs %s WARNING:  Quit signal %s received!\\e[0m\\n" "updateTermuxArch.bash" "$RV"
+printf "\\e[?25h\\e[1;7;38;5;0mＴｅｒｍｕｘＡｒｃｈ %s NOTICE:  Quit signal %s received!\\e[0m\\n" "${0##*/}" "$RV"
 exit 177
 }
 
@@ -38,7 +38,7 @@ trap _SGSATRPQUIT_ QUIT
 RDR="$PWD"
 _GSA_() { # git repository update modules
 WRDR="$1"
-(git submodule update $3 --depth 1 --init --recursive --remote "$1" && _PRCS_) || _PESTRG_ "$1" update # the command ` git submodule help ` and the book https://git-scm.com/book/en/v2/Git-Tools-Submodules have more information about git submodules
+{ git submodule update --depth 1 --init --recursive --remote "$1" && _PRCS_ ; } || { git submodule add --depth 1 https://github.com/"$3"/"$2" "$1" && _PRCS_ ; } || _PESTRG_ "$1" update # the command ` git submodule help ` and the book https://git-scm.com/book/en/v2/Git-Tools-Submodules have more information about git submodules
 }
 
 _PESTRG_() {
@@ -75,9 +75,9 @@ sed -i '/\.\/\.scripts\/maintenance\//d' sha512.sum
 sed -i '/\.\/docs\//d' sha512.sum
 sed -i '/\.\/gen\//d' sha512.sum
 fi
-sha512sum -c --quiet sha512.sum || _PRNT_ "WARNING:  Checking checksums in directory $PWD with sha512sum FAILED! "
-_GSA_ ".scripts/maintenance" maintenance "" || printf "\\n\\n%s\\n" "Cannot add or update module .scripts/maintenance; Continuing..."
-_GSA_ docs docsTermuxArch "" || printf "\\n\\n%s\\n" "Cannot add or update module docs; Continuing..."
-_GSA_ gen genTermuxArch "" || printf "\\n\\n%s\\n" "Cannot add or update module gen; Continuing..."
-_GSA_ scripts "scripts.TermuxArch" "" || printf "\\n\\n%s\\n" "Cannot add or update module scripts; Continuing..."
+sha512sum -c --quiet sha512.sum || _PRNT_ "ＴｅｒｍｕｘＡｒｃｈ NOTICE:  Checking checksums in directory $PWD with sha512sum FAILED! "
+_GSA_ ".scripts/maintenance" maintenance shlibs || printf "\\n\\n%s\\n" "Cannot add or update module .scripts/maintenance; Continuing..."
+_GSA_ docs docsTermuxArch TermuxArch || printf "\\n\\n%s\\n" "Cannot add or update module docs; Continuing..."
+_GSA_ gen genTermuxArch TermuxArch || printf "\\n\\n%s\\n" "Cannot add or update module gen; Continuing..."
+_GSA_ scripts "scripts.TermuxArch" TermuxArch || printf "\\n\\n%s\\n" "Cannot add or update module scripts; Continuing..."
 # pullTermuxArchSubmodules.bash FE

@@ -4,9 +4,8 @@
 ## https://sdrausty.github.io/TermuxArch/README has info about this project.
 ## https://sdrausty.github.io/TermuxArch/CONTRIBUTORS Thank you for your help.
 ################################################################################
-
 declare -a USRINITFILES	# declare array for user init files
-USRINITFILES=(BASH_PROFILEFILE BASHRCFILE CSHRCFILE EMACSRCFILE GITCONFIGFILE INITRCFILE INPUTRCFILE VIMRCFILE PROFILEFILE ZSHRCFILE)
+USRINITFILES=(BASH_PROFILEFILE BASHRCFILE CSHRCFILE EMACSITFILE GITCONFIGFILE INITRCFILE INPUTRCFILE VIMRCFILE PROFILEFILE ZSHRCFILE)
 _ADDADDS_() {
 _ADDREADME_
 _ADDae_
@@ -81,7 +80,7 @@ _ADDpc_
 _ADDpci_
 _ADDpinghelp_
 _ADDprofile_
-if [[ -n "${VLORALCR:-}" ]]
+if [ -n "${VLORALCR:-}" ]
 then
 _ADDprofileetc_
 _ADDprofileusretc_
@@ -91,6 +90,7 @@ _PREPMOTS_
 _ADDmota_
 _ADDmotd_
 _ADDmoto_
+_ADDstriphtmlcodefromfile_
 _ADDt_
 _ADDtlmgrinstaller_
 [ -f usr/local/bin/top ] ||  _ADDtop_
@@ -129,7 +129,7 @@ fi
 _FUNADDU_() {
 [[ ! "\$(command -v sudo)" ]] 2>/dev/null && (pc sudo || pc sudo)
 printf "\\\\e[0;32m%s\\\\n\\\\e[1;32m" "Adding Arch Linux in Termux PRoot user '\$1' and creating Arch Linux in Termux PRoot user \$1's home directory in /home/\$1..."
-[[ ! -f /etc/sudoers ]] && :>/etc/sudoers
+[ -f /etc/sudoers ] || :>/etc/sudoers
 sed -i "/# %wheel ALL=(ALL) NOPASSWD: ALL/ s/^# *//" /etc/sudoers
 sed -i "/# ALL ALL=(ALL) ALL/ s/^# *//" /etc/sudoers
 sed -i "s/# ALL ALL=(ALL) ALL/ALL ALL=(ALL) NOPASSWD: ALL/g" /etc/sudoers
@@ -257,14 +257,14 @@ rm -f /etc/ssl/certs/ca-certificates.crt
 sed -i '/^LocalFileSigLevel/s/.*/SigLevel    = Optional/' /etc/pacman.conf
 sed -i '/^SigLevel/s/.*/SigLevel    = Optional/' /etc/pacman.conf
 pacman -Sy || pacman -Sy || sudo pacman -Sy
-pacman -Su --needed --noconfirm || pacman -Su --needed --noconfirm || sudo pacman -Su --needed --noconfirm"
+pacman -Su keychain --needed --noconfirm || pacman -Su keychain --needed --noconfirm || sudo pacman -Su --needed --noconfirm"
 X86IPT=" "
 X86INK=":"
 else	# Arch Linux architectures armv5, armv7, aarch64 and x86-64 use these options
 X86INT=":"
 X86IPT="(1/2)"
 X86INK="printf \"\\\\n\\\\e[1;32m==> \\\\e[1;37mRunning \\\\e[1;32mpacman -S %s --needed --noconfirm --color=always\\\\e[1;37m...\\\\n\" \"\$ARGS\"
-pacman -S \"\${KEYRINGS[@]}\" --needed --noconfirm --color=always || pacman -S \"\${KEYRINGS[@]}\" --needed --noconfirm --color=always
+pacman -S \"\${KEYRINGS[@]}\" keychain --needed --noconfirm --color=always || pacman -S \"\${KEYRINGS[@]}\" keychain --needed --noconfirm --color=always
 printf \"\\\\n\\\\e[1;32m(2/2) \\\\e[0;34mWhen \\\\e[1;37mGenerating pacman keyring master key\\\\e[0;34m appears on the screen, the installation process can be accelerated.  The system desires a lot of entropy at this part of the install procedure.  To generate as much entropy as possible quickly, watch and listen to a file on your device.  \\\\n\\\\nThe program \\\\e[1;32mpacman-key\\\\e[0;34m will want as much entropy as possible when generating keys.  Entropy is also created through tapping, sliding, one, two and more fingers tapping with short and long taps.  When \\\\e[1;37mAppending keys from archlinux.gpg\\\\e[0;34m appears on the screen, use any of these simple methods to accelerate the installation process if it is stalled.  Put even simpler, just do something on device.  Browsing files will create entropy on device.  Slowly swiveling the device in space and time will accelerate the installation process.  This method alone might not generate enough entropy (a measure of randomness in a closed system) for the process to complete quickly.  Use \\\\e[1;32mbash ~%s/bin/we \\\\e[0;34min a new Termux session to watch entropy on device.\\\\n\\\\e[1;32m==> \\\\e[1;37mRunning \\\\e[1;32mpacman-key --populate\\\\e[1;37m...\\\\n\" \"$DARCH\"
 { [ -f /var/run/lock/"${INSTALLDIR##*/}"/kpp.lock ] && printf '\\e[1;32m==> \\e[1;37mAlready populated with command \\e[1;32mpacman-key --populate\\e[1;37m...\\n' ; } || { printf '\\e[1;32m==> \\e[1;37mRunning \\e[1;32mpacman-key --populate\\e[1;37m...\\n' && { $ECHOEXEC pacman-key --populate && :>/var/run/lock/"${INSTALLDIR##*/}"/kpp.lock ; } || _PRTERROR_ ; }
 printf \"\\\\e[1;32m==>\\\\e[1;37m Running \\\\e[1;32mpacman -Ss keyring --color=always\\\\e[1;37m...\\\\n\"
@@ -279,7 +279,7 @@ printf "\\\\n\\\\e[1;32m%s \\\\e[0;34mWhen \\\\e[1;37mGenerating pacman keyring 
 }
 
 _GENEN_() {
-printf "\\\\e[0;32m%s\\\\e[1;32m%s\\\\e[0m\\\\n\\\\e[0m" "Generating entropy on device;  " "Please wait...  "
+printf "\\\\e[0;32m%s\\\\e[1;32m%s\\\\e[0m\\\\n\\\\e[0m" "Generating entropy on device;  " "Please wait a moment...  "
 GENENN=16
 for INT in \$(seq 1 \$GENENN); do
 nice -n 20 ls -alR /usr >/dev/null &
@@ -394,6 +394,7 @@ set colored-completion-prefix on
 set completion-ignore-case on
 set completion-prefix-display-length 3
 set completion-query-items 32
+# set editing-mode vi
 set enable-keypad on
 set enable-meta-key on
 set expand-tilde off
@@ -405,27 +406,27 @@ set output-meta on
 set print-completions-horizontally on
 set show-all-if-ambiguous on
 set show-all-if-unmodified on
-set show-mode-in-prompt on
+# set show-mode-in-prompt on
 set visible-stats on")"
 _COMPAREFILE_ "$INPUTRCFILE" ".inputrc" "root"
 }
 
 _ADDprofile_() {
-PROFILEFILE="$(printf '%s\n' "export TMPDIR=\"/tmp\"")"
+PROFILEFILE="$(printf '%s\n%s\n' "export TMPDIR=\"/tmp\"" "$(awk '(NR>1)' etc/locale.conf)")"
 _COMPAREFILE_ "$PROFILEFILE" ".profile" "root"
 }
 
 _ADDzshrc_() { :>root/.zshrc ; }
 
 _COMPAREFILE_() { # compare and write file if differ
-_WRITENEWFILE_() { printf '%s\n' "$1" > "$3/$2" && printf '\e[0;32m%s\n' "File '${INSTALLDIR##*/}/$3/$2' ${@: -1}." ; }
+_WRITENEWFILE_() { printf '%s\n' "$1" > "$3/$2" && printf '\e[0;32mFile \e[0;32m%s \e[0;32m%s.\n' "$3/$2" "${@: -1}" ; }
 if [ -f "$3/$2" ] # file exists
 then # compare
-if [[ "$1" != "$(cat $3/$2)" ]] # data differs
+if [[ "$1" != "$(<"$3"/"$2")" ]] # data differs
 then # write file
 _WRITENEWFILE_ "$@" "updated"
 else
-printf '\e[0;32m%s\n' "Data in file '${INSTALLDIR##*/}/$3/$2' is equal."
+printf '\e[0;32mData in file \e[1;32m%s\e[0;32m is equal.\n' "$3/$2"
 fi
 else # write data to file if it does not exist
 _WRITENEWFILE_ "$@" "created"
@@ -443,7 +444,7 @@ _CFLHDR_ "$STARTBIN"
 printf "%s\\n" "${FLHDRP[@]}" >> "$STARTBIN"
 cat >> "$STARTBIN" <<- EOM
 _CHCKUSER_() { [ -d "$INSTALLDIR/home/\$2" ] || _PRNTUSGE_ "\$@" ; }
-_COMMANDGNE_() { printf "\\n\\e[1;48;5;138mScript %s\\e[0m\\n\\n" "\${0##*/} WARNING:  Please run '\${0##*/}' and 'bash \${0##*/}' from the BASH shell in native Termux:  EXITING..." && exit 202 ; }
+_COMMANDGNE_() { printf "\\n\\e[1;48;5;138mＴｅｒｍｕｘＡｒｃｈ script %s\\e[0m\\n\\n" "\${0##*/} NOTICE:  Please run '\${0##*/}' and 'bash \${0##*/}' from the BASH shell in native Termux:  EXITING..." && exit 202 ; }
 if [ -w /root ]
 then
 _COMMANDGNE_
@@ -452,7 +453,7 @@ _PRINTUSAGE_() {
 printf "\\n\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN" "  starts Arch Linux in $TXPRQUON with PRoot root login.  This account is reserved for system administration.  Please use any system administrator account with care."
 printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN c[ommand] command" "  runs Arch Linux commands from Termux as PRoot root login.  Quoting multiple commands can assit when passing multiple arguments; i.e. " "$STARTBIN c 'whoami ; cat -n /etc/pacman.d/mirrorlist'" ".  Please pass commands through the system administrator account with caution."
 printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN e[login|user] user" "  login as user.  Uses alternate elogin and euser option to login as user.  This option is preferred for working with programs that have already been installed, and for working with the 'cp' and 'git' commands.  Please use " "$STARTBIN c 'addauser user'" " first to create this user and the user's home directory."
-printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN l[ogin]|u[ser] user" "  login as user.  This option is preferred when installing software from a user account with the 'sudo' command, and when using commands such as 'makeaurhelpers', 'makepkg' and 'makeauryay'.  Please use 'addauser user' first to create this user and the user's home directory."
+printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN l[ogin]|u[ser] user" "  login as user.  This option is preferred when installing software from a user account with the 'sudo' command, and when using the 'makeaur*' commands.  Please use 'addauser user' first to create this user and the user's home directory."
 printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n" "$STARTBIN r[aw]" "  construct the " "$STARTBIN " "proot statement from exec.../bin/.  For example " "$STARTBIN r su " "will exec 'su' in Arch Linux.  After installing the appropriate packages in Arch Linux, easy PRoot root shell access is possible with option raw:
 
 ~ $ startarch r bash
@@ -463,7 +464,7 @@ printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n
 ~ $ startarch+x864 r zsh
 
 Variable PROOTSTMNT has more information about PRoot init statement options 'grep -h PROOTSTMNT ~/TermuxArchBloom/* | grep \=' if you wish to modify the PRoot init statement extensively.  The PRoot init statement can also be modified on-the-fly simply by using the /var/binds/ directory once logged into the Arch Linux in Termux PRoot environment."
-printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n\\e[0m" "$STARTBIN s[u] user command" "  executes commands as Arch Linux user from the Termux shell.  This option is preferred when installing software from a user account with the 'sudo' command, and when using commands such as 'makeaurhelpers', 'makepkg' and 'makeauryay'.  Quoting multiple commands can assit when passing multiple arguments:  " "$STARTBIN s user 'whoami ; cat -n /etc/pacman.d/mirrorlist'" ".  Please use " "$STARTBIN c 'addauser user'" " first to create a login and the login's home directory."
+printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n\\e[0m" "$STARTBIN s[u] user command" "  executes commands as Arch Linux user from the Termux shell.  This option is preferred when installing software from a user account with the 'sudo' command, and when using the 'makeaur*' commands.  Quoting multiple commands can assit when passing multiple arguments:  " "$STARTBIN s user 'whoami ; cat -n /etc/pacman.d/mirrorlist'" ".  Please use " "$STARTBIN c 'addauser user'" " first to create a login and the login's home directory."
 printf '\\033]2;%s\\007' "TermuxArch $STARTBIN $@ 📲; DONE 🏁"
 }
 _PRNTUSGE_() { _PRINTUSAGE_ && printf "\\e[0;33m%s\\e[1;30m%s\\e[1;32m%s\\e[1;30m%s\\e[1;31m%s\\e[1;30m%s\\e[0m" "It appears that user '\$2' does not exist in the Arch Linux in Termux PRoot system!  " "You can create user '\$2' with the command " "\${0##*/} command 'addauser \$2'" " then rerun this comnand to login with user '\$2';" "  Exiting" "...  " ; exit 169 ; }
@@ -582,14 +583,25 @@ _DOKYLGEN_() {
 DOKYSKEY=""
 LOCGEN=":"
 }
+_LOCALEGENPACNEW_() {
+
+if [ ! -f var/run/lock/"${INSTALLDIR##*/}"/locale.gen.pacnew.lock ]
+then
+if [ -f "etc/locale.gen.pacnew" ]
+then
+cp -f etc/locale.gen var/backups/"${INSTALLDIR##*/}"/etc/locale.gen."$SDATE".bkp && cp -f etc/locale.gen.pacnew etc/locale.gen && :>var/run/lock/"${INSTALLDIR##*/}"/locale.gen.pacnew.lock
+fi
+fi
+}
 if [[ "${LCR:-}" -eq 5 ]] || [[ -z "${LCR:-}" ]]	# LCR equals 5 or is undefined
 then
 _DOKEYS_
-[ -f var/run/lock/"${INSTALLDIR##*/}"/locale.gen.pacnew.lock ] || { [ -f etc/locale.gen.pacnew ] && cp -f etc/locale.gen var/backups/"${INSTALLDIR##*/}"/etc/locale.gen."$SDATE".bkp && cp -f etc/locale.gen.pacnew etc/locale.gen && :>var/run/lock/"${INSTALLDIR##*/}"/locale.gen.pacnew.lock ; }
+_LOCALEGENPACNEW_
 LOCGEN="locale-gen || locale-gen"
 elif [[ "${LCR:-}" -eq 1 ]] || [[ "${LCR:-}" -eq 2 ]] || [[ "${LCR:-}" -eq 3 ]] || [[ "${LCR:-}" -eq 4 ]] 	# LCR equals 1 or 2 or 3 or 4
 then
 _DOKYLGEN_
+_LOCALEGENPACNEW_
 fi
 _CFLHDR_ "root/bin/$BINFNSTP"
 cat >> root/bin/"$BINFNSTP" <<- EOM
@@ -602,18 +614,18 @@ printf "\\n\\e[1;34m:: \\e[1;32m%s\\n" "Processing system for $NASVER $CPUABI, a
 }
 EOM
 _DOPROXY_
-mkdir -p "$INSTALLDIR/run/lock/${INSTALLDIR##*/}"
+[ -d "$INSTALLDIR/run/lock/${INSTALLDIR##*/}" ] || mkdir -p "$INSTALLDIR/run/lock/${INSTALLDIR##*/}"
 if [[ ! -f "$INSTALLDIR/run/lock/${INSTALLDIR##*/}/pacmanRc.lock" ]]
 then
 if [[ "$CPUABI" = "$CPUABI5" ]]
 then
-printf "%s\\n" "{ _PMGPSSTRING_ && pacman -Rc linux-armv5 linux-firmware --noconfirm --color=always && :>"/run/lock/${INSTALLDIR##*/}/pacmanRc.lock" ; } || _PMFSESTRING_ \"pacman -Rc linux-armv5 linux-firmware $BINFNSTP \${0##/*}\"" >> root/bin/"$BINFNSTP"
+printf "%s\\n" "{ _PMGPSSTRING_ && pacman -Rc linux-armv5 linux-firmware --noconfirm --color=always && :>/run/lock/"${INSTALLDIR##*/}"/pacmanRc.lock ; } || _PMFSESTRING_ \"pacman -Rc linux-armv5 linux-firmware $BINFNSTP \${0##/*}\"" >> root/bin/"$BINFNSTP"
 elif [[ "$CPUABI" = "$CPUABI7" ]]
 then
-printf "%s\\n" "{ _PMGPSSTRING_ && pacman -Rc linux-armv7 linux-firmware --noconfirm --color=always && :>"/run/lock/${INSTALLDIR##*/}/pacmanRc.lock" ; } || _PMFSESTRING_ \"pacman -Rc linux-armv7 linux-firmware $BINFNSTP \${0##/*}\"" >> root/bin/"$BINFNSTP"
+printf "%s\\n" "{ _PMGPSSTRING_ && pacman -Rc linux-armv7 linux-firmware --noconfirm --color=always && :>/run/lock/"${INSTALLDIR##*/}"/pacmanRc.lock ; } || _PMFSESTRING_ \"pacman -Rc linux-armv7 linux-firmware $BINFNSTP \${0##/*}\"" >> root/bin/"$BINFNSTP"
 elif [[ "$CPUABI" = "$CPUABI8" ]]
 then
-printf "%s\\n" "{ _PMGPSSTRING_ && pacman -Rc linux-aarch64 linux-firmware --noconfirm --color=always && :>"/run/lock/${INSTALLDIR##*/}/pacmanRc.lock" ; } || _PMFSESTRING_ \"pacman -Rc linux-aarch64 linux-firmware $BINFNSTP \${0##/*}\"" >> root/bin/"$BINFNSTP"
+printf "%s\\n" "{ _PMGPSSTRING_ && pacman -Rc linux-aarch64 linux-firmware --noconfirm --color=always && :>/run/lock/"${INSTALLDIR##*/}"/pacmanRc.lock ; } || _PMFSESTRING_ \"pacman -Rc linux-aarch64 linux-firmware $BINFNSTP \${0##/*}\"" >> root/bin/"$BINFNSTP"
 fi
 fi
 printf "%s\\n" "$DOKYSKEY" >> root/bin/"$BINFNSTP"
@@ -630,11 +642,16 @@ printf "%s\\n" "pacman -Su glibc --needed --noconfirm --color=always || pacman -
 fi
 fi
 cat >> root/bin/"$BINFNSTP" <<- EOM
-printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n" "To generate locales in a preferred language, you can use the native Android menu tap commands " "Settings > Language & Keyboard > Language " "in Android; Then run " "${0##*/} refresh" " for a full system refresh, which includes the locale generation function; For a quick refresh you can use " "${0##*/} r" ".  For a refresh with user directories " "${0##*/} re" " can be used."
+printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n" "To generate locales in a preferred language, you can use the native Android menu commands " "Settings > System > Input & Language > Language " "in Android;  Then run " "${0##*/} refresh" " for a full system refresh, which includes the locale generation function; For a quick refresh you can use " "${0##*/} r" ".  For a refresh with user directories " "${0##*/} re" " can be used."
 $LOCGEN || _PMFSESTRING_ "LOCGEN $BINFNSTP ${0##/*}.  Please run '$LOCGEN' again in the installed system."
 EOM
-printf "%s\\n" "printf \"\\n\\e[1;32m==> \\e[1;37mRunning TermuxArch command \\e[1;32maddauser user\\e[1;37m...\\n\"" >> root/bin/"$BINFNSTP"
-printf "%s\\n" "addauser user || _PMFSESTRING_ \"addauser user $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+printf "%s\\n" "[ -d /home/user ] || printf \"\\n\\e[1;32m==> \\e[1;37mRunning TermuxArch command \\e[1;32maddauser user\\e[1;37m...\\n\"" >> root/bin/"$BINFNSTP"
+printf "%s\\n" "[ -d /home/user ] || addauser user || _PMFSESTRING_ \"addauser user $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+if [[ "${LCR:-}" -eq 3 ]] || [[ "${LCR:-}" -eq 4 ]]
+then
+printf "%s\\n" "locale-gen || locale-gen" >> root/bin/"$BINFNSTP"
+fi
+printf "%s\\n" "# root/bin/$BINFNSTP FE" >> root/bin/"$BINFNSTP"
 chmod 700 root/bin/"$BINFNSTP"
 }
 
@@ -643,10 +660,11 @@ _CFLHDR_ root/bin/setupbin.bash
 printf "%s\\n" "set +Eeuo pipefail" >> root/bin/setupbin.bash
 printf "%s\\n" "$PROOTSTMNT /root/bin/$BINFNSTP ||:" >> root/bin/setupbin.bash
 printf "%s\\n" "set -Eeuo pipefail" >> root/bin/setupbin.bash
+printf "%s\\n" "# root/bin/setupbin.bash FE" >> root/bin/setupbin.bash
 chmod 700 root/bin/setupbin.bash
 }
 
-_SETLANGUAGE_() { # This function uses device system settings to set locale.  To generate locales in a preferred language, you can use "Settings > Language & Keyboard > Language" in Android; Then run 'setupTermuxArch r' for a quick system refresh to regenerate locales in your preferred language.
+_SETLANGUAGE_() { ## Function _SETLANGUAGE_ uses device system settings to set locales.  Generating locales in a preferred language should be simple if an exact language match was found.  "Settings > System > Input & Language > Language" sets the system language in Android which can be migrated into this system with one of the refresh options;  Command 'setupTermuxArch re' will attempt to update the TermuxArch system overlay with a quick refresh to the newest published version, and attempt to regenerate locales in your preferred language automatically.
 LANGIN=([0]="$(getprop user.language)")
 LANGIN+=([1]="$(getprop user.region)")
 LANGIN+=([2]="$(getprop persist.sys.country)")
@@ -664,21 +682,21 @@ ULANGUAGE="${LANGIN[LANGSET]//-/_}"
 break
 fi
 done
-printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\n" "Setting locales to: " "Language " ">> $ULANGUAGE << " "Region" ": Please wait a moment."
+printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\n" "Setting locales to " "Language " ">> $ULANGUAGE << " "Region" " Please wait a moment."
 }
 
-_SETLOCALE_() { # This function uses device system settings to set locale.  To generate locales in a preferred language you can use "Settings > Language & Keyboard > Language" in Android;  Then run 'setupTermuxArch re' for a quick system refresh.
+_SETLOCALE_() { ## Function _SETLOCALE_ uses device system settings to set locales.  Generating locales in a preferred language should be simple if an exact language match was found.  "Settings > System > Input & Language > Language" sets the system language in Android which can be migrated into this system with one of the refresh options;  Command 'setupTermuxArch re' will attempt to update the TermuxArch system overlay with a quick refresh to the newest published version, and attempt to regenerate locales in your preferred language automatically.
 printf "%s\\n" "##  File locale.conf was generated by ${0##*/} at ${FTIME//-}." > etc/locale.conf
 for LC_N in "${!LC_TYPE[@]}"
 do
 printf "%s\\n" "${LC_TYPE[LC_N]}=$ULANGUAGE.UTF-8" >> etc/locale.conf
 done
 set +e
-if grep "$ULANGUAGE"\\.UTF-8 etc/locale.gen
+if grep "$ULANGUAGE"\\.UTF-8 etc/locale.gen 1>/dev/null
 then
-sed -i "/\\#$ULANGUAGE.UTF-8 UTF-8/{s/#//g;s/@/-at-/g;}" etc/locale.gen && printf "\\e[0;32mFound an exact match for language \\e[1;32m>> %s <<\\e[0;32m to continue locale configuration.  Command \\e[1;32mlocale-gen\\e[0;32m generates locales." "$ULANGUAGE" # && locale-gen
+sed -i "/\\#$ULANGUAGE.UTF-8 UTF-8/{s/#//g;s/@/-at-/g;}" etc/locale.gen && printf "\\e[0;32mFound an exact match for language \\e[1;32m>> %s <<\\e[0;32m to continue locale configuration.  Command \\e[1;32m%s refresh\\e[0;32m generates locales from device.  Command \\e[1;32mlocale-gen\\e[0;32m generates locales." "$ULANGUAGE" "${0##*/}"
 else
-printf "\\e[0;33mCould not find an exact match for language \\e[1;33m>> %s <<\\e[0;33m in file /etc/local.gen.  Please edit files /etc/local.conf and /etc/local.gen, and then run the command \\e[1;33mlocale-gen\\e[0;33m to generate locales.  " "$ULANGUAGE"
+printf "\\e[0;33mCould not find an exact match for language \\e[1;33m>> %s <<\\e[0;33m in file /etc/locale.gen.  Please edit files /etc/locale.conf, /etc/locale.gen and .profile.  Then run the command \\e[1;33mlocale-gen\\e[0;33m to generate locales.  " "$ULANGUAGE"
 fi
 }
 # initkeyfunctions.bash FE
