@@ -34,7 +34,7 @@ BKPDIR="$INSTALLDIR/var/backups/${INSTALLDIR##*/}/home/$TALUSER"
 [ -d "$BKPDIR" ] || mkdir -p "$BKPDIR"
 if [ "$TALUSER" != alarm ]
 then
-DOFLIST_=(.bash_profile .bashrc .cshrc .emacs .gitconfig .initrc .inputrc .vimrc .profile .zshrc)
+DOFLIST_=(.bash_logout .bash_profile .bashrc .cshrc .emacs .gitconfig .initrc .inputrc .vimrc .profile .zshrc)
 for DOFLNAME in "${DOFLIST_[@]}"
 do
 printf "\\n\\e[0;32mProcessing user \\e[1;32m%s\\e[0;32m file \\e[1;32m%s\\e[0;32m.  " "$TALUSER" "$DOFLNAME"
@@ -61,15 +61,23 @@ _DOFUNLCR2_
 done
 }
 
-_DOUSECACHEDIR_() {
-if [ "$USECACHEDIR" = 0 ] && [[ -z "${LCR:-}" ]]
-then
+_PPLCACHEDIR_() {
 printf '\e[0;32mPopulating from cache files;  \e[1;32mBEGUN\n'
-{ cd "$CACHEDIR" 2>/dev/null && printf '%s' "cd $CACHEDIR && " ; } || { cd "$PREFIXDATAFILES" && mkdir -p "$CACHEDIRSUFIX" && cd "$CACHEDIR" && printf '%s' "cd $PREFIXDATAFILES && mkdir -p $CACHEDIRSUFIX && cd $CACHEDIR && " ; } || exit 196
-printf '%s\n' "cp -fr * $INSTALLDIR"
-cp -fr ./* "$INSTALLDIR"
+{ cd "$CACHEDIR" && printf '%s' "cd $CACHEDIR && " ; } || { cd "$PREFIXDATAFILES" && mkdir -p "$CACHEDIRSUFIX" && cd "$CACHEDIR" && printf '%s' "cd $PREFIXDATAFILES && mkdir -p $CACHEDIRSUFIX && cd $CACHEDIR && " ; } || exit 196
+[ -d "$CACHEDIRSUFIX" ] || { mkdir -p "$CACHEDIRSUFIX" && printf '%s' "mkdir -p $CACHEDIRSUFIX && " ; }
+cd "$INSTALLDIR" && printf '%s\n' "cd $INSTALLDIR" || exit 196
+find "$CACHEDIR" -type f -name "*tar.gz*" -exec ln -s {} \;
+[ -d "$INSTALLDIR"/var/cache/pacman/pkg ] || { mkdir -p "$INSTALLDIR"/var/cache/pacman/pkg && printf '%s' "mkdir -p $INSTALLDIR/var/cache/pacman/pkg && " ; }
+cd "$INSTALLDIR"/var/cache/pacman/pkg && printf '%s\n' "cd $INSTALLDIR/var/cache/pacman/pkg" || exit 196
+printf '%s\n' "find "$CACHEDIR$CACHEDIRSUFIX" -type f -exec ln -s {} \;" && find "$CACHEDIR$CACHEDIRSUFIX" -type f -exec ln -s {} \;
 cd "$INSTALLDIR" && printf '%s\n' "cd $INSTALLDIR" || exit 196
 printf '\e[0;32mPopulating from cache files;  \e[1;32mDONE\n\n'
+}
+
+_DOUSECACHEDIR_() {
+if [ "$USECACHEDIR" = 0 ] && [ -z "${LCR:-}" ]
+then
+_PPLCACHEDIR_
 fi
 }
 
@@ -99,7 +107,7 @@ exit
 
 _FIXOWNER_() { # fix owner of INSTALLDIR/home/TALUSER, PR9 by @petkar
 _DOFIXOWNER_() {
-printf "\\e[0;32m%s" "Adjusting ownership and permissions:  "
+printf "\\e[0;32m%s" "Adjusting ownership and permissions: BEGUN"
 FXARR="$(ls "$INSTALLDIR/home")"
 for TALUSER in ${FXARR[@]}
 do
@@ -109,7 +117,7 @@ $STARTBIN c "chmod 777 $INSTALLDIR/home/$TALUSER"
 $STARTBIN c "chown -R $TALUSER:$TALUSER $INSTALLDIR/home/$TALUSER"
 fi
 done
-printf "\\e[0;32m%s\\e[0m\\n" "DONE"
+printf "\\e[0;32m%s\\e[0m\\n" ": DONE"
 }
 _DOFIXOWNER_ || _PSGI1ESTRING_ "_DOFIXOWNER_ maintenanceroutines.bash ${0##*/}"
 }
@@ -123,7 +131,7 @@ _PR00TSTRING_
 _SETLANGUAGE_
 _PREPROOTDIR_ || _PSGI1ESTRING_ "_PREPROOTDIR_ _REFRESHSYS_ maintenanceroutines.bash ${0##*/}"
 _ADDADDS_
-printf '\e[0;32mGenerating dot files;  \e[1;32mDONE\n'
+printf '\e[0;32mGenerating dot files:  \e[1;32mDONE\n'
 _DOUSECACHEDIR_
 _MAKEFINISHSETUP_
 _MAKESETUPBIN_
@@ -142,8 +150,8 @@ ls "$INSTALLDIR"/root/.bashrc | cut -f7- -d /
 ls "$INSTALLDIR"/root/.bash_profile | cut -f7- -d /
 ls "$INSTALLDIR"/root/.vimrc | cut -f7- -d /
 ls "$INSTALLDIR"/root/.gitconfig | cut -f7- -d /
-printf "\\n\\e[1;32m%s\\n\\e[0;32m" "Files updated to the newest version $VERSIONID in directory ~/${INSTALLDIR##*/}/usr/local/bin/:"
-ls "$INSTALLDIR/usr/local/bin/"
+printf "\\n\\e[1;32m%s\\n\\e[0;32m" "Files updated to the newest version $VERSIONID in directory ~/${INSTALLDIR##*/}$TMXRCHBNDR/:"
+ls "$INSTALLDIR$TMXRCHBNDR/"
 if [[ "${LCR:-}" = 2 ]] || [[ "${LCR:-}" = 3 ]] || [[ "${LCR:-}" = 4 ]] || [[ "${LCR:-}" = 5 ]]
 then
 _FUNLCR2_
@@ -168,7 +176,7 @@ _SHFDFUNC_ () {
 SHFD="$(find "$RMDIR" -type d -printf '%03d %p\n' | sort -r -n -k 1 | cut -d" " -f 2)"
 for SHF1D in $SHFD
 do
-rmdir "$SHF1D" || printf "%s" "Cannot 'rmdir $SHF1D'; Continuing..."
+rmdir "$SHF1D" || printf "%s" "Cannot 'rmdir $SHF1D': Continuing..."
 done
 }
 printf "\n%s\n" "Script '${0##*/}' checking and fixing permissions in directory '$PWD': STARTED..."
@@ -176,17 +184,18 @@ SDIRS="apex data host-rootfs sdcard storage system vendor"
 for SDIR in $SDIRS
 do
 RMDIR="$INSTALLDIR/$SDIR"
-[ -d "$RMDIR" ] && { chmod 755 "$RMDIR" ; printf "%s" "Deleting superfluous '$RMDIR' directory: " && (rmdir "$RMDIR" || _SHFDFUNC_) && printf "%s\n" "Continuing..." ; }
+[ -d "$RMDIR" ] && { chmod 755 "$RMDIR" ; printf "%s" "Deleting superfluous '$RMDIR' directory: " && { rmdir "$RMDIR" || _SHFDFUNC_ ; } && printf "%s\n" "Continuing..." ; }
 done
 PERRS="$(du "$INSTALLDIR" 2>&1 >/dev/null ||:)"
 PERRS="$(sed "s/du: cannot read directory '//g" <<< "$PERRS" | sed "s/': Permission denied//g")"
-[ -z "$PERRS" ] || { printf "%s" "Fixing  permissions in '$INSTALLDIR': " && for PERR in $PERRS ; do chmod 777 "$PERR" ; done && printf "%s\n" "DONE" ; } || printf "%s" "Fixing  permissions signal PERRS; Continuing..."
+[ -z "$PERRS" ] || { printf "%s" "Fixing  permissions in '$INSTALLDIR': " && for PERR in $PERRS ; do chmod 777 "$PERR" ; done && printf "%s\n" "DONE" ; } || printf "%s" "Fixing  permissions signal PERRS: Continuing..."
 printf "%s\n" "Script '${0##*/}' checking and fixing permissions: DONE"
 }
 
 _SHFUNCWRAP_ () {
 if [[ "${LCR:-}" -eq 3 ]] || [[ "${LCR:-}" -eq 4 ]] || [[ "${LCR:-}" -eq 5 ]]
 then
+_PREPPACMANCONF_
 FNDTMPROOT=($(ls "$TMPDIR"/))
 if [ ${#FNDTMPROOT[@]} = 0 ]
 then
@@ -204,7 +213,7 @@ fi
 
 _SPACEINFO_() {
 declare SPACEMESSAGE=""
-units="$(df "$INSTALLDIR" 2>/dev/null | awk 'FNR == 1 {print $2}')"
+units="$(df "$INSTALLDIR" | awk 'FNR == 1 {print $2}')"
 if [[ "$units" = Size ]]
 then
 _SPACEINFOGSIZE_
@@ -361,22 +370,22 @@ printf "\\n%s" "Ascertaining system information;  Please wait a moment  "
 [[ -r /sys/shm ]] && printf "%s\\n" "/sys/shm is readable" || printf "%s\\n" "/sys/shm is not readable" >> "${WDIR}setupTermuxArchSysInfo$STIME".log
 printf "\\n%s\\n" "Disk report $USRSPACE on /data $(date)" >> "${WDIR}setupTermuxArchSysInfo$STIME".log
 printf "\\n%s\\n" "df $INSTALLDIR results:" >> "${WDIR}setupTermuxArchSysInfo$STIME".log
-df "$INSTALLDIR" >> "${WDIR}setupTermuxArchSysInfo$STIME".log 2>/dev/null ||:
+df "$INSTALLDIR" >> "${WDIR}setupTermuxArchSysInfo$STIME".log ||:
 printf "\\n%s\\n" "df results:" >> "${WDIR}setupTermuxArchSysInfo$STIME".log
-df >> "${WDIR}setupTermuxArchSysInfo$STIME".log 2>/dev/null ||:
+df >> "${WDIR}setupTermuxArchSysInfo$STIME".log ||:
 printf "\\n%s\\n" "du -hs $INSTALLDIR results:" >> "${WDIR}setupTermuxArchSysInfo$STIME".log
-du -hs "$INSTALLDIR" >> "${WDIR}setupTermuxArchSysInfo$STIME".log 2>/dev/null ||:
+du -hs "$INSTALLDIR" >> "${WDIR}setupTermuxArchSysInfo$STIME".log ||:
 printf "\\n%s\\n" "ls -al $INSTALLDIR results:" >> "${WDIR}setupTermuxArchSysInfo$STIME".log
-ls -al "$INSTALLDIR" >> "${WDIR}setupTermuxArchSysInfo$STIME".log 2>/dev/null ||:
+ls -al "$INSTALLDIR" >> "${WDIR}setupTermuxArchSysInfo$STIME".log ||:
 printf "\\n%s\\n" "This file is found at '${WDIR}setupTermuxArchSysInfo$STIME.log'." >> "${WDIR}setupTermuxArchSysInfo$STIME".log
 printf "\\n%s\\e[0m\\n" "End 'setupTermuxArchSysInfo$STIME.log' version $VERSIONID system information." >> "${WDIR}setupTermuxArchSysInfo$STIME".log
 }
 
 _USERSPACE_() {
-USRSPACE="$(df "$INSTALLDIR" 2>/dev/null | awk 'FNR == 2 {print $4}')"
+USRSPACE="$(df "$INSTALLDIR" | awk 'FNR == 2 {print $4}')"
 if [[ "$USRSPACE" = "" ]]
 then
-USRSPACE="$(df "$INSTALLDIR" 2>/dev/null | awk 'FNR == 3 {print $3}')"
+USRSPACE="$(df "$INSTALLDIR" | awk 'FNR == 3 {print $3}')"
 fi
 }
 # maintenanceroutines.bash FE

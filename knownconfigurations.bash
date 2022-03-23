@@ -13,9 +13,14 @@
 ## DMVERBOSE="-v" 	##  uncomment for verbose download tool output with curl and wget;  For verbose output throughout runtime change this setting in file 'setupTermuxArch' also.
 ECHOEXEC=""		##  insert 'echo' to suppress most 'pacman' instructions from 'keys' file during runtime
 ECHOSYNC=""		##  insert 'echo' to only suppress 'pacman' syncing instructions from 'keys' file during runtime
-KEEP=1			##  change to 0 to keep downloaded image;  Testing the installation process repeatedly can be made easier and lighter on your Internet bandwidth and SAR with 'KEEP=0' and this fragment of code  'mkdir ~/arch; cp ~/ArchLinux*.tar.gz* ~/arch/' and similar.  The variable KEEP when changed to 0 (true) will keep the downloaded image and md5 files instead of deleting them for later reuse.  The root file system image and md5 files can be saved and used again on subsequent installs.
-USECACHEDIR=1		##  change to 0 to use cache directory;  When changed to 0 this installation script uses a cache directory defined in `necessaryfunctions.bash` that can be used to cache all of the installation files in order to save wireless bandwidth upon subsequent reinstallation.  Variable `KEEP=1`  should be changed to 0 also in order to keep the downloaded image file and md5 files. The downloaded image and md5 files should be moved to CACHEDIR along with files in INSTALLDIR/var/cache/pacman/pkg in order to avoid subsequent redownloading of these files for reinstalling the entire system.
-UNAMER="$(uname -r)"
+KEEP=0			##  change to 0 to keep downloaded image;  Testing the installation process repeatedly can be made easier and lighter on your Internet bandwidth and SAR with 'KEEP=0' and this fragment of code  'mkdir ~/arch; cp ~/ArchLinux*.tar.gz* ~/arch/' and similar.  The variable KEEP when changed to 0 (true) will keep the downloaded image and md5 files instead of deleting them for later reuse.  The root file system image and md5 files can be saved and used again on subsequent installs.
+USECACHEDIR=0		##  change to 0 to use cache directory;  When changed to 0 this installation script uses a cache directory defined in `necessaryfunctions.bash` that can be used to cache all of the installation files in order to save wireless bandwidth upon subsequent reinstallation.  Variable `KEEP=1`  should be changed to 0 also in order to keep the downloaded image file and md5 files. The downloaded image and md5 files should be moved to CACHEDIR along with files in INSTALLDIR/var/cache/pacman/pkg in order to avoid subsequent redownloading of these files for reinstalling the entire system.
+CACHLCTN="0"
+CACHEDIR="/storage/emulated/$CACHLCTN/Android/data/com.termux/files/cache/archlinux/$CACHECPBI/"
+PREFIXDATAFILES="/storage/emulated/$CACHLCTN/Android/data/com.termux/"
+# KID=1			##  do not change, not user configurable;  Used for testing, timing and development.   For timing Arch Linux in PRoot, uncomment and then run script TermuxArch/scripts/frags/stdoutbench.sh in Arch Linux PRoot for timing Arch Linux in PRoot if desired.
+##  If there are system image files available not listed here, and if there are system image file worldwide mirrors available not listed here, please open an issue and a pull request.
+
 _AARCH64ANDROID_() {
 IFILE="ArchLinuxARM-aarch64-latest.tar.gz"
 CMIRROR="os.archlinuxarm.org"
@@ -68,7 +73,7 @@ _MAKESYSTEM_
 ##  Appending to the PRoot statement can be accomplished on the fly by creating a .prs file in the var/binds directory.  The format is straightforward, 'PROOTSTMNT+="option command "'.  The space is required before the last double quote.  Commands 'info proot' and 'man proot' have more information about what can be configured in a proot init statement.  If more suitable configurations are found, share them at https://github.com/TermuxArch/TermuxArch/issues to improve TermuxArch.  PRoot bind usage: PROOTSTMNT+="-b host_path:guest_path "  The space before the last double quote is necessary.
 
 _PR00TSTRING_() { # construct the PRoot init statement
-[[ -z "${QEMUCR:-}" ]] && CPUABI="$(getprop ro.product.cpu.abi)" && SYSVER="$(getprop ro.build.version.release)" && NASVER="$(getprop net.bt.name ) $SYSVER" || [[ $QEMUCR="0" ]] && SYSVER="$(getprop ro.build.version.release)" && NASVER="$(getprop net.bt.name) $(getprop ro.product.cpu.abi) $SYSVER" || _PSGI1ESTRING_ "CPUABI knownconfigurations.bash ${0##*/}"
+[[ -z "${QEMUCR:-}" ]] && CPUABI="$(getprop ro.product.cpu.abi)" && SYSVER="$(getprop ro.build.version.release)" && NASVER="$(getprop net.bt.name ) $SYSVER" || [[ $QEMUCR="0" ]] && SYSVER="$(getprop ro.build.version.release)" && NASVER="$(getprop net.bt.name) $SYSVER $(getprop ro.product.cpu.abi)" || _PSGI1ESTRING_ "CPUABI knownconfigurations.bash ${0##*/}"
 PROOTSTMNT="exec proot "
 if [[ -z "${KID:-}" ]]
 then	# command 'grep -w KID *h' shows variable KID usage
@@ -80,19 +85,10 @@ else
 PROOTSTMNT+=""
 fi
 PROOTSTMNT+="--kill-on-exit --sysvipc --link2symlink -i \"\$2:wheel\" -0 -r $INSTALLDIR "
-# file var/binds/fbindexample.prs has a few more examples
-if [[ -n "$(ls -A "$INSTALLDIR"/var/binds/*.prs)" ]]
-then
-for PRSFILES in "$INSTALLDIR"/var/binds/*.prs
-do
-. "$PRSFILES"
-done
-fi
 if [[ "${QEMUCR:-}" == 0 ]]
 then
 PROOTSTMNT+="-q $PREFIX/bin/qemu-${ARCHITEC/x86-64/x86_64} "
 fi
-[[ "$SYSVER" -ge 10 ]] && PROOTSTMNT+="-b /apex -b /storage -b /sys -b /system -b /vendor "
 ##  Function _PR00TSTRING_ which creates the PRoot init statement PROOTSTMNT uses associative arrays.  Page https://www.gnu.org/software/bash/manual/html_node/Arrays.html has information about BASH arrays and is also available at https://www.gnu.org/software/bash/manual/ this link.
 declare -A PRSTARR # associative array
 # populate writable binds
@@ -105,7 +101,7 @@ PROOTSTMNT+="-b $PRBIND:$PRBIND "
 fi
 done
 # populate readable binds
-PRSTARR=(["$EXTERNAL_STORAGE"]="$EXTERNAL_STORAGE" ["$HOME"]="$HOME" ["$PREFIX"]="$PREFIX" [/data/dalvik-cache/]=/data/dalvik-cache/ [/dev/]=/dev/ [/dev/urandom]=/dev/random [/linkerconfig/ld.config.txt]=/linkerconfig/ld.config.txt [/plat_property_contexts]=/plat_property_contexts [/proc/]=/proc/ [/proc/self/fd]=/dev/fd [/proc/self/fd/0]=/dev/stdin [/proc/self/fd/1]=/dev/stdout [/proc/self/fd/2]=/dev/stderr [/proc/stat]=/proc/stat [/property_contexts]=/property_contexts)
+PRSTARR=(["$EXTERNAL_STORAGE"]="$EXTERNAL_STORAGE" ["$HOME"]="$HOME" ["$PREFIX"]="$PREFIX" [/apex/]=/apex/ [/data/dalvik-cache/]=/data/dalvik-cache/ [/dev/]=/dev/ [/dev/urandom]=/dev/random [/linkerconfig/ld.config.txt]=/linkerconfig/ld.config.txt [/plat_property_contexts]=/plat_property_contexts [/property_contexts]=/property_contexts [/proc/]=/proc/ [/proc/self/fd]=/dev/fd [/proc/self/fd/0]=/dev/stdin [/proc/self/fd/1]=/dev/stdout [/proc/self/fd/2]=/dev/stderr [/proc/stat]=/proc/stat [/property_contexts]=/property_contexts [/storage/]=/storage/ [/system/]=/system/ [/vendor/]=/vendor/)
 for PRBIND in ${!PRSTARR[@]}
 do
 if [[ -r "$PRBIND" ]]	# is readable
@@ -113,8 +109,9 @@ then	# add proot bind
 PROOTSTMNT+="-b $PRBIND:${PRSTARR[$PRBIND]} "
 fi
 done
+[[ "$SYSVER" -ge 10 ]] && PROOTSTMNT+="-b /apex -b /storage -b /sys -b /system -b /vendor "
 # populate NOT readable binds
-PRSTARR=([/dev/]=/dev/ [/dev/ashmem]="$INSTALLDIR/tmp" [/dev/shm]="$INSTALLDIR/tmp" [/proc/stat]="$INSTALLDIR/var/binds/fbindprocstat" [/proc/uptime]="$INSTALLDIR/var/binds/fbindprocuptime")
+PRSTARR=([/dev/]=/dev/ [/dev/ashmem]="$INSTALLDIR/tmp" [/dev/shm]="$INSTALLDIR/tmp" [/proc/loadavg]="$INSTALLDIR/var/binds/fbindprocloadavg" [/proc/pcidevices]="$INSTALLDIR/var/binds/fbindprocpcidevices" [/proc/shmem]="$INSTALLDIR/var/binds/fbindprocshmem" [/proc/stat]="$INSTALLDIR/var/binds/fbindprocstat" [/proc/uptime]="$INSTALLDIR/var/binds/fbindprocuptime" [/proc/vmstat]="$INSTALLDIR/var/binds/fbindprocvmstat" [/proc/version]="$INSTALLDIR/var/binds/fbindprocversion")
 for PRBIND in ${!PRSTARR[@]}
 do
 if [[ ! -r "$PRBIND" ]]	# is not readable
@@ -122,6 +119,14 @@ then	# add proot bind
 PROOTSTMNT+="-b ${PRSTARR[$PRBIND]}:$PRBIND "
 fi
 done
+# file var/binds/fbindexample.prs has examples
+if [[ -n "$(ls -A "$INSTALLDIR"/var/binds/*.prs)" ]]
+then
+for PRSFILES in "$INSTALLDIR"/var/binds/*.prs
+do
+. "$PRSFILES"
+done
+fi
 PROOTSTMNT+="-b /data/data/com.termux/files/usr/tmp:/tmp -w /root /usr/bin/env -i HOME=/root TERM=\"$TERM\" TMPDIR=/tmp ANDROID_DATA=/data "
 PROOTSTMNTU="${PROOTSTMNT//HOME=\/root/HOME=\/home\/\$2}"
 PROOTSTMNTU="${PROOTSTMNTU//-0 }"
