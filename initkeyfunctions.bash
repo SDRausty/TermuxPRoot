@@ -57,6 +57,13 @@ _ADDmakeaurparubin_
 _ADDmakeaurparugit_
 _ADDmakeaurparuz_
 _ADDmakeaurpbget_
+_ADDmakeaurpowerpill_
+_ADDmakeaurpython3colorsysplus_
+_ADDmakeaurpython3memoizedb_
+_ADDmakeaurpython3xcgf_
+_ADDmakeaurpython3xcpf_
+_ADDmakeaurpython3aur_
+_ADDmakeaurpm2ml_
 _ADDmakeaurpikaur_
 _ADDmakeaurpikaurgit_
 _ADDmakeaurpkgbuilder_
@@ -74,7 +81,7 @@ _ADDmakeaurtrizen_
 _ADDmakeaurtrizengit_
 _ADDmakeauryaah_
 _ADDmakeauryay_
-_ADDmakeauryayim_
+# _ADDmakeauryayim_ Failed to connect to gitea.jojiiofficial.de port 443
 _ADDmakeaurutils_
 _ADDmakeaurutilsgit_
 _ADDmakeksh_
@@ -274,7 +281,7 @@ X86INK=":"
 else	# Arch Linux architectures armv5, armv7, aarch64 and x86-64 use these options
 X86INT=":"
 X86IPT="(1/2)"
-X86INK="printf \"\\\\n\\\\e[1;32m==> \\\\e[1;37mRunning command \\\\e[1;32mpacman -S %s --needed --noconfirm --color=always\\\\e[1;37m...\\\\n\" \"\$ARGS\"
+X86INK="[ \"\${#ARGS}\" = 0 ] || { printf \"\\\\n\\\\e[1;32m==> \\\\e[1;37mRunning command \\\\e[1;32mpacman -S %s --needed --noconfirm --color=always\\\\e[1;37m...\\\\n\" \"\$ARGS\" && pacman -S \$ARGS --needed --noconfirm --color=always || _PRTERROR_ ; }
 printf \"\\\\n\\\\e[1;32m(2/2) \\\\e[0;34mWhen \\\\e[1;37mGenerating pacman keyring master key\\\\e[0;34m appears on the screen, the installation process can be accelerated.  The system desires a lot of entropy at this part of the install procedure.  To generate as much entropy as possible quickly, watch and listen to a file on your device.  \\\\n\\\\nThe program \\\\e[1;32mpacman-key\\\\e[0;34m will want as much entropy as possible when generating keys.  Entropy is also created through tapping, sliding, one, two and more fingers tapping with short and long taps.  When \\\\e[1;37mAppending keys from archlinux.gpg\\\\e[0;34m appears on the screen, use any of these simple methods to accelerate the installation process if it is stalled.  Put even simpler, just do something on device.  Browsing files will create entropy on device.  Slowly swiveling the device in space and time will accelerate the installation process.  This method alone might not generate enough entropy (a measure of randomness in a closed system) for the process to complete quickly.  Use \\\\e[1;32m~%s/bin/we\\\\e[0;34m in a new Termux session to generate and watch entropy on device.\\\\n\\\\e[1;32m==> \\\\e[1;37mRunning command \\\\e[1;32mpacman-key --populate\\\\e[1;37m...\\\\n\" \"$DARCH\"
 { [ -f /var/run/lock/"${INSTALLDIR##*/}"/kpp.lock ] && printf '\\e[1;32m==> \\e[1;37mAlready populated with command \\e[1;32mpacman-key --populate\\e[1;37m...\\n' ; } || { printf '\\e[1;32m==> \\e[1;37mRunning command \\e[1;32mpacman-key --populate\\e[1;37m...\\n' && { $ECHOEXEC pacman-key --populate && :>/var/run/lock/"${INSTALLDIR##*/}"/kpp.lock ; } || _PRTERROR_ ; }
 printf \"\\\\e[1;32m==>\\\\e[1;37m Running command \\\\e[1;32mpacman -Ss keyring --color=always\\\\e[1;37m...\\\\n\"
@@ -289,9 +296,10 @@ printf "\\\\n\\\\e[1;32m%s \\\\e[0;34mWhen \\\\e[1;37mGenerating pacman keyring 
 }
 
 _GENEN_() {
-printf "\\\\e[0;32m%s\\\\e[1;32m%s\\\\e[0m\\\\n\\\\e[0m" "Generating entropy on device;  " "Please wait a moment...  "
+printf "\\\\e[0;32mGenerating entropy on device;  \\\\e[1;32mPlease wait a moment...  "
 GENENN=16
-for INT in \$(seq 1 \$GENENN); do
+for GNNT in \$(seq 1 \$GENENN)
+do
 nice -n 20 ls -alR /usr >/dev/null &
 nice -n 20 find /usr >/dev/null &
 nice -n 20 cat /dev/urandom >/dev/null &
@@ -299,12 +307,12 @@ done
 }
 
 _PRINTTAIL_() {
-printf "\\\\n\\\\e[0;32m%s \\\\e[1;32m%s \\\\e[0;32m%s\\\\e[1;34m: \\\\e[1;32m%s\\\\e[0m 🏁  \\\\n\\\\n\\\\e[0m" "TermuxArch command" "\$STRANARG" "version \$VERSIONID" "DONE 📱"
-printf '\033]2;  🔑 TermuxArch %s: DONE 📱 \007'  "'\$STRANARG'"
+printf "\\\\n\\\\e[0;32m%s \\\\e[1;32m%s \\\\e[0;32m%s\\\\e[1;34m: \\\\e[1;32m%s\\\\e[0m 🏁  \\\\n\\\\n\\\\e[0m" "TermuxArch command" "\$STRNRG" "version \$VERSIONID" "DONE 📱"
+printf '\033]2;  🔑 TermuxArch %s: DONE 📱 \007'  "'\$STRNRG'"
 }
 
 _PRTERROR_() {
-printf "\\n\\e[1;31merror: \\e[1;37m%s\\e[0m\\n\\n" "Please study the first lines of the error output and correct the error(s) and/or warning(s) and run '\$STRANARG' again."
+printf "\\n\\e[1;31merror: \\e[1;37m%s\\e[0m\\n\\n" "Please study the first lines of the error output and correct the error(s) and/or warning(s) and run '\$STRNRG' again."
 }
 
 _TRPET_() {
@@ -359,8 +367,8 @@ KEYRINGS[0]="archlinux-keyring"
 KEYRINGS[1]="ca-certificates-utils"
 fi
 ARGS="\${KEYRINGS[@]}"
-printf '\033]2;  🔑 TermuxArch %s 📲 \007' "'\$STRANARG'"
-printf "\\\\e[1;32m==> \\\\e[1;37mRunning command \\\\e[1;32m%s \\\\e[0;32m%s\\\\e[1;37m...\\\\n" "\$STRANARG" "version \$VERSIONID"
+printf '\033]2;  🔑 TermuxArch %s 📲 \007' "'\$STRNRG'"
+printf "\\\\e[1;32m==> \\\\e[1;37mRunning command \\\\e[1;32m%s \\\\e[0;32m%s\\\\e[1;37m...\\\\n" "\$STRNRG" "version \$VERSIONID"
 _GENEN_ ; kill \$! &
 _KEYSGENMSG_
 _DOPSY_() {
@@ -473,7 +481,7 @@ printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n
 ~ $ startarch+x864 r sh
 ~ $ startarch+x864 r zsh
 
-Variable PROOTSTMNT has more information about PRoot init statement options 'grep -h PROOTSTMNT ~/TermuxArchBloom/* | grep \=' if you wish to modify the PRoot init statement extensively.  The PRoot init statement can also be modified on-the-fly simply by using the /var/binds/ directory once logged into the Arch Linux in Termux PRoot environment."
+Command '${0##*/} qemu [options]' assists in installing alternate architectures.  Variable PROOTSTMNT has more information about PRoot init statement options 'grep -h PROOTSTMNT ~/TermuxArchBloom/* | grep \=' if you wish to modify the PRoot init statement extensively.  The PRoot init statement can also be modified on-the-fly simply by using the /var/binds/ directory once logged into the Arch Linux in Termux PRoot environment."
 printf "\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\\n\\e[0m" "$STARTBIN s[u] user command" "  executes commands as Arch Linux user from the Termux shell.  This option is preferred when installing software from a user account with the 'sudo' command, and when using the 'makeaur*' commands.  Quoting multiple commands can assit when passing multiple arguments:  " "$STARTBIN s user 'whoami ; cat -n /etc/pacman.d/mirrorlist'" ".  Please use " "$STARTBIN c 'addauser user'" " first to create a login and the login's home directory."
 printf '\\033]2;%s\\007' "TermuxArch $STARTBIN $@ 📲; DONE 🏁"
 }
@@ -495,7 +503,7 @@ _PRINTUSAGE_
 elif [[ -z "\${2:-}" ]]
 then
 _PRINTUSAGE_
-printf "\\e[0;33m%s\\e[1;30m%s\\e[0;31m%s\\e[1;30m%s\\e[0m" "Please use at least one more argument to continue.  The command '\${0##*/} help' has more information" ";" "  Exiting" "...  "
+printf "\\e[0;33m%s\\e[1;30m%s\\e[0;0m%s\\e[1;30m%s\\e[0;31m%s\\e[1;30m%s\\e[0m" "Please use at least one more argument to continue.  The command '\${0##*/} help' has more information;" "  Possible substitute command '" "\${0##*/} c 'addauser \$1'" "';" "  Exiting" "...  "
 ## [command ARGS] Execute a command in BASH as root.
 elif [[ "\${1//-}" = [Cc]* ]]
 then
@@ -640,12 +648,12 @@ if  [[ -z "${LCR:-}" ]] || [[ "${LCR:-}" -eq 5 ]]
 then
 if [[ "$CPUABI" = "$CPUABIX8664" ]] || [[ "$CPUABI" = "${CPUABIX8664//_/-}" ]]
 then
-printf "%s\\n" "pacman -Su keychain glibc grep gzip sed sudo --needed --noconfirm --color=always || pacman -Su keychain glibc grep gzip sed sudo --needed --noconfirm --color=always || _PMFSESTRING_ \"pacman -Su keychain glibc grep gzip sed sudo $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+printf "%s\\n" "pacman -Su keychain glibc grep gzip pacman-contrib sed sudo --needed --noconfirm --color=always || pacman -Su keychain glibc grep gzip pacman-contrib sed sudo --needed --noconfirm --color=always || _PMFSESTRING_ \"pacman -Su keychain glibc grep gzip sed sudo $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 elif [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = i386 ]]
 then
-printf "%s\\n" "pacman -Su keychain glibc sed sudo --needed --noconfirm --color=always || pacman -Su keychain glibc sed sudo --needed --noconfirm --color=always || _PMFSESTRING_ \"pacman -Su keychain glibc sed sudo $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+printf "%s\\n" "pacman -Su keychain glibc pacman-contrib sed sudo --needed --noconfirm --color=always || pacman -Su keychain glibc sed sudo --needed --noconfirm --color=always || _PMFSESTRING_ \"pacman -Su keychain glibc pacman-contrib sed sudo $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 else
-printf "%s\\n" "pacman -Su keychain glibc --needed --noconfirm --color=always || pacman -Su keychain glibc --needed --noconfirm --color=always || _PMFSESTRING_ \"pacman -Su keychain glibc $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
+printf "%s\\n" "pacman -Su keychain glibc pacman-contrib --needed --noconfirm --color=always || pacman -Su keychain glibc pacman -S pacman-contrib --needed --noconfirm --color=always || _PMFSESTRING_ \"pacman -Su keychain glibc $BINFNSTP ${0##/*}\"" >> root/bin/"$BINFNSTP"
 fi
 fi
 printf "%s\\n" "printf \"\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\n\" \"To generate locales in a preferred language, you can use the native Android menu commands \" \"Settings > System > Input & Language > Language \" \"in Android;  Then run \" \"${0##*/} refresh\" \" for a full system refresh, which includes the locale generation function; For a quick refresh you can use \" \"${0##*/} r\" \".  For a refresh with user directories \" \"${0##*/} re\" \" can be used.\"
@@ -664,7 +672,6 @@ _MAKESETUPBIN_() {
 _CFLHDR_ root/bin/setupbin.bash
 printf "%s\\n" "set +Eeuo pipefail" >> root/bin/setupbin.bash
 printf "%s\\n" "$PROOTSTMNT /root/bin/$BINFNSTP ||:" >> root/bin/setupbin.bash
-printf "%s\\n" "set -Eeuo pipefail" >> root/bin/setupbin.bash
 printf "%s\\n" "# root/bin/setupbin.bash FE" >> root/bin/setupbin.bash
 chmod 700 root/bin/setupbin.bash
 }

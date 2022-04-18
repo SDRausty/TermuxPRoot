@@ -15,7 +15,7 @@ FLHDR1[1]=""
 FLHDR1[2]="set -Eeuo pipefail"
 FLHDR1[3]="shopt -s extglob nullglob globstar"
 FLHDR1[4]="unset LD_PRELOAD"
-FLHDR1[5]="VERSIONID=2.0.519"
+FLHDR1[5]="VERSIONID=2.0.526"
 FLHDR1[6]=""
 FLHDRP[0]="## BEGIN #####################################################################"
 FLHDRP[1]=""
@@ -30,11 +30,11 @@ TRPEXIT[1]="	local RV=\"\$?\""
 TRPEXIT[2]="	printf \"\""
 TRPEXIT[3]="	if [[ \"\$RV\" = 0 ]]"
 TRPEXIT[4]="	then"
-TRPEXIT[5]="		printf \"\\\\e[0;32mTermuxArch command \\\\e[1;32m%s\\\\e[0;32m version %s\\\\e[1;34m: \\\\e[1;32mDONE 🏁\\\\e[0m\\\\n\" \"\$STRANARG\" \"\$VERSIONID\""
-TRPEXIT[6]="		printf \"\\\\e]2; %s: DONE 🏁 \007\" \"\$STRANARG\""
+TRPEXIT[5]="		printf \"\\\\e[0;32mTermuxArch command \\\\e[1;32m'%s'\\\\e[0;32m version %s\\\\e[1;34m: \\\\e[1;32mDONE 🏁\\\\e[0m\\\\n\" \"\$STRNRG\" \"\$VERSIONID\""
+TRPEXIT[6]="		printf \"\\\\e]2; %s: DONE 🏁 \007\" \"\$STRNRG\""
 TRPEXIT[7]="	else"
-TRPEXIT[8]="		printf \"\\\\e[0;32mTermuxArch command \\\\e[1;32m%s\\\\e[0;32m version %s\\\\e[0m [Exit Signal %s]\\\\e[1;34m: \\\\e[1;32mDONE  🏁\\\\e[0m\\\\n\" \"\$STRANARG\" \"\$VERSIONID\" \"\$RV\""
-TRPEXIT[9]="		printf \"\033]2; %s [Exit Signal %s]: DONE 🏁 \007\" \"\$STRANARG\" \"\$RV\""
+TRPEXIT[8]="		printf \"\\\\e[0;32mTermuxArch command \\\\e[1;32m'%s'\\\\e[0;32m version %s\\\\e[0m [Exit Signal %s]\\\\e[1;34m: \\\\e[1;32mDONE  🏁\\\\e[0m\\\\n\" \"\$STRNRG\" \"\$VERSIONID\" \"\$RV\""
+TRPEXIT[9]="		printf \"\033]2; %s [Exit Signal %s]: DONE 🏁 \007\" \"\$STRNRG\" \"\$RV\""
 TRPEXIT[10]="	fi"
 TRPEXIT[11]="	printf \"\\e[?25h\\e[0m\""
 TRPEXIT[12]="	set +Eeuo pipefail"
@@ -56,8 +56,8 @@ TRAPS[1]="trap _TRPET_ EXIT"
 TRAPS[2]="trap _TRPSIG_ HUP INT TERM"
 TRAPS[3]="trap _TRPQ_ QUIT"
 TRAPS[4]="ARGS=\"\$@\""
-TRAPS[5]="{ [ -z \"\${ARGS:-}\" ] && STRANARG=\"\${0##*/}\" ; } || STRANARG=\"\${0##*/} \${ARGS:-}\""
-# TRAPS[6]="printf \"\\\\e[1;32m==> \\\\e[0mRunning TermuxArch command \\\\e[1;32m%s\\\\e[0;32m %s\\\\e[1;37m...\\\\n\" \"\$STRANARG\" \"version \$VERSIONID\""
+TRAPS[5]="{ [ -z \"\${ARGS:-}\" ] && STRNRG=\"\${0##*/}\" ; } || STRNRG=\"\${0##*/} \${ARGS:-}\""
+# TRAPS[6]="printf \"\\\\e[1;32m==> \\\\e[0mRunning TermuxArch command \\\\e[1;32m%s\\\\e[0;32m %s\\\\e[1;37m...\\\\n\" \"\$STRNRG\" \"version \$VERSIONID\""
 
 _CFLHD_() { #	creates file header and inserts comments
 if [[ -z "${2:-}" ]]
@@ -140,7 +140,7 @@ printf "\\e[1;32mDONE  \\e[0m\\n\\n"
 
 _PRINTWLA_() {
 printf '\033]2; 🕛 > 🕒 Activating termux-wake-lock: OK\007'
-printf "\\e[0;34m 🕛 > 🕒 \\e[1;34mActivating termux-wake-lock: "
+printf "\\n\\e[0;34m 🕛 > 🕒 \\e[1;34mActivating termux-wake-lock: "
 }
 
 _PRINTWLD_() {
@@ -197,7 +197,7 @@ printf "\\n\\e[07;1m\\e[31;1m 🔆 ＴｅｒｍｕｘＡｒｃｈ SIGNAL md5sum 
 
 _PRINTMD5SUCCESS_() {
 printf "\\e]2;%s\\007" " 🕛 > 🕡 Unpacking $IFILE..."
-printf "\\n\\n\\e[0;34m 🕛 > 🕕 \\e[1;34mSystem image file download integrity check: \\e[1;32mDONE\\n\\n\\e[0;34m 🕛 > 🕡 \\e[1;34mUnpacking %s into %s.  The option to create Arch Linux system users is available through \\e[1;32maddauser\\e[1;34m.  Arch Linux user login from Termux with \\e[1;32m%s \\e[1;34mis now implemented.  Please see \\e[0;36mAbility for Scripts to Launch Commands for Arch Linux in Termux PRoot on Device\\e[1;34m https://github.com/sdrausty/TermuxArch/issues/54 for information how to use this option.  \\n\\nWhile waiting, you can use \\e[0;36mdf\\e[1;34m, \\e[0;36mdu -hs\\e[1;34m, \\e[0;36mhtop\\e[1;34m, \\e[0;36mps\\e[1;34m, \\e[0;36mtop\\e[1;34m and \\e[0;36mwatch\\e[1;34m in a new Termux session to watch the unpacking while this session completes.  Use \\e[0;36mhelp man \\e[1;34mand \\e[0;36minfo man \\e[1;34mto learn more about your Linux system in the palm of your hand.  See The Linux Documentation Project http://tldp.org to learn more about Linux and CLI (command line interface) commands.\\n\\nIf simply scrolling the screen up by scrolling up does produce the desired effect, you can try this method.  Long tap until the popup menu shows.  Then scroll up without loosing touch with the screen and without touching the popup menu.  \\e[1;37mUnpacking \\e[1;32m%s\\e[1;37m will take a long time;  Please be patient   \\e[0m" "$IFILE" "$INSTALLDIR" "$STARTBIN" "$IFILE"
+printf "\\n\\n\\e[0;34m 🕛 > 🕔 \\e[1;34mSystem image file download integrity check: \\e[1;32mDONE\\n\\n\\e[0;34m 🕛 > 🕡 \\e[1;34mUnpacking %s into %s.  The option to create Arch Linux system users is available through \\e[1;32maddauser\\e[1;34m.  Arch Linux user login from Termux with \\e[1;32m%s \\e[1;34mis now implemented.  Please see \\e[0;36mAbility for Scripts to Launch Commands for Arch Linux in Termux PRoot on Device\\e[1;34m https://github.com/sdrausty/TermuxArch/issues/54 for information how to use this option.  \\n\\nWhile waiting, you can use \\e[0;36mdf\\e[1;34m, \\e[0;36mdu -hs\\e[1;34m, \\e[0;36mps\\e[1;34m, \\e[0;36mtop\\e[1;34m and \\e[0;36mwatch\\e[1;34m in a new Termux session to watch the unpacking while this session completes.  Use \\e[0;36mhelp man \\e[1;34mand \\e[0;36minfo man \\e[1;34mto learn more about your Linux system in the palm of your hand.  See The Linux Documentation Project http://tldp.org to learn more about Linux and CLI (command line interface) commands.\\n\\nIf simply scrolling the screen up by scrolling up does produce the desired effect, you can try this method.  Long tap until the popup menu shows.  Then scroll up without loosing touch with the screen and without touching the popup menu.  \\e[1;37mUnpacking \\e[1;32m%s\\e[1;37m will take a long time;  Please be patient   \\e[0m" "$IFILE" "$INSTALLDIR" "$STARTBIN" "$IFILE"
 }
 
 _PRINTMISMATCH_() {
@@ -208,7 +208,7 @@ exit
 
 _PRINTFOOTER_() {
 printf "\033]2;%s\007" "Thank you for using '${0##*/}' to install Arch Linux in Termux PRoot 📲 "
-printf "\\e[0;34m 🕛 > 🕥 \\e[1;34mYou can use \\e[1;32m%s \\e[1;34mto launch Arch Linux in Termux PRoot.  Alternatively, you can run \\e[1;32m~%s \\e[1;34min a BASH shell to start Arch Linux in Termux PRoot in future sessions.  See \\e[1;32m%s help \\e[1;34mfor usage information.\\e[0m\\n\\n" "$STARTBIN" "$PRINTROOTDIR/$STARTBIN" "$STARTBIN"
+printf "\\e[0;34m 🕛 > 🕚 \\e[1;34mYou can use \\e[1;32m%s \\e[1;34mto launch Arch Linux in Termux PRoot.  Alternatively, you can run \\e[1;32m~%s \\e[1;34min a BASH shell to start Arch Linux in Termux PRoot in future sessions.  See \\e[1;32m%s help \\e[1;34mfor usage information.\\e[0m\\n\\n" "$STARTBIN" "$PRINTROOTDIR/$STARTBIN" "$STARTBIN"
 printf "\\e[0;32m 🕛 = 🕛 \\e[1;34mYou can use \\e[1;32mtour\\e[1;34m to run a very short tour to get to know the new Arch Linux in Termux PRoot environment you just set up a little bit better.  If there was more than one error during the update procedure and you would like to refresh the installation, use \\e[1;32m%s refresh\\e[1;34m.  This will update and recreate the configuration provided.  The TermuxArch command \\e[1;32mkeys \\e[1;34mhelps install and generate Arch Linux keyring keys.\\n\\n" "${0##*/}"
 _PRINTFOOTER2_
 }
@@ -223,7 +223,7 @@ printf "\\e[1;34m%s\\e[0;32m%s\\e[1;34m%s\\e[0;32m%s\\e[1;34m%s\\e[0m\\n\\n" "Th
 _PRTX8664_() {
 printf "\\e[1;34m%s\\e[0;32m%s\\e[1;34m%s\\e[0;32m%s\\e[1;34m%s\\e[0m\\n\\n" "The website " "https://bbs.archlinux.org/" " has Arch Linux discussion forums for the Arch Linux project.  The webpage " "https://wiki.archlinux.org/index.php/IRC_channel" " lists available Arch Linux IRC channels regarding the Arch Linux $CPUABI computer architecture."
 }
-printf "\\e[1;34m%s\\n\\n%s\\e[1;32m%s\\e[1;34m%s\\e[1;32m%s\\e[1;34m%s" "Arch Linux in Termux PRoot is installed in $INSTALLDIR.  This project is in active development.  Contributions to this project are welcome; See https://sdrausty.github.io/TermuxArch/CONTRIBUTORS for information.  The documentation repository for TermuxArch https://sdrausty.github.io/TermuxArch/docs/ is a TermuxArch module that is located at https://github.com/sdrausty/docsTermuxArch.  Pull requests and contributions through the issues pages are open to improve the ux (user experience) and this Termux PRoot installation script. " "The commands " "~$PRINTROOTDIR/$STARTBIN " "and " "$STARTBIN " "can be used in a BASH shell to launch Arch Linux in Termux PRoot for future sessions.  If you are new to *nix, http://tldp.org has *nix documentation.  "
+printf "\\e[1;34m%s\\n\\n%s\\e[1;32m%s\\e[1;34m%s\\e[1;32m%s\\e[1;34m%s" "Arch Linux in Termux PRoot is installed in $INSTALLDIR.  This project is in active development.  Contributions to this project are welcome; See https://sdrausty.github.io/TermuxArch/CONTRIBUTORS for information.  The documentation repository for TermuxArch https://sdrausty.github.io/TermuxArch/docs is a TermuxArch module that is located at https://github.com/sdrausty/docsTermuxArch.  Pull requests and contributions through the issues pages are open to improve the ux (user experience) and this Termux PRoot installation script. " "The commands " "~$PRINTROOTDIR/$STARTBIN " "and " "$STARTBIN " "can be used in a BASH shell to launch Arch Linux in Termux PRoot for future sessions.  If you are new to *nix, http://tldp.org has *nix documentation.  "
 if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = i386 ]]
 then
 _PRTX86_
@@ -237,6 +237,7 @@ fi
 
 _PRINTPROOTERROR_() {
 printf "\\e[0;34m\\n%s\\n\\n%s\\n\\n%s\\e[0m" "If error ' proot info: vpid 1: terminated with signal 11 ' is found, ensure that all the software is up to date.  After updating all software, including Android software, please reference these links in order to find a resolution if updating Termux app and Termux packages and Android device software was unsuccessful:" "  * https://github.com/termux/proot/issues?q=\"proot info: vpid 1: terminated with signal 11\"" "  * https://github.com/termux/termux-packages/issues?q=\"proot info: vpid 1: terminated with signal 11\""
+printf "\\e[0;34m\\n%s\\n\\n%s\\n\\n%s\\e[0m" "If error ' proot info: vpid 1: terminated with signal 4 ' is found, please create a /var/binds/qbinds.prs file in order to complete the QEMU configuration by running command '${0##*/} r' after creating and editing a 'qbinds.prs' file."
 printf "\\e[0;34m\\n%s\\n\\n%s\\n\\n%s\\e[0m" "If error ' env ... not found ' is found, ensure that all the software is up to date.  After updating, please reference these links in order to find a resolution if updating Termux app and Termux packages was unsuccessful:" "  * https://github.com/termux/proot/issues?q=\"env\"+\"not+found\"" "  * https://github.com/termux/termux-packages/issues?q=\"not+found\"+\"proot\""
 }
 
