@@ -6,20 +6,37 @@
 ################################################################################
 _PRNT_ () { printf "%s\\n" "$1" ; }	# print message with one trialing newline
 _PRT_ () { printf "%s" "$1" ; }	# print message with no trialing newline
-
-[ "$CPUABI" = i386 ] && CPUABI="x86"
-CACHECPBI="${CPUABI/_/-}"
-CACHEDIRSUFIX="var/cache/pacman/pkg/"
+_QEMUCFCK_() {
+if [[ -f "$INSTALLDIR/$STARTBIN" ]] && grep proot "$INSTALLDIR/$STARTBIN" | grep -m1 qemu 1>/dev/null
+then    # set installed qemu architecture
+ARCTEVAR="$(grep proot "$INSTALLDIR/$STARTBIN" | grep -m1 qemu)"
+ARCTEVAR="$(cut -d" " -f1 <<< ${ARCTEVAR#*qemu-})"
+[ "${ARCTEVAR:-}" = x86 ] && ARCTEVAR="i386"
+for RCTFVR in ${ALLRCTFVR[@]}
+do
+if [ "$RCTFVR" = "${ARCTEVAR:-}" ]
+then
+INCOMM="qemu-user-${ARCTEVAR:-}" && QEMUCR=0
+break
+fi
+done
+fi
+[ -z ${ARCTEVAR:-} ] && ARCTEVAR="$CPUABI"
+CPUABIDD="$(getprop ro.product.cpu.abi)"
+printf "Detected architecture is %s;  Install architecture is set to %s.\\n" "$CPUABIDD" "$ARCTEVAR"
+}
+_QEMUCFCK_
 BINFNSTP="finishsetup.bash"
+CACHEDIRSUFIX="var/cache/pacman/pkg/"
 LC_TYPE=("LANG" "LANGUAGE" "LC_ADDRESS" "LC_COLLATE" "LC_CTYPE" "LC_IDENTIFICATION" "LC_MEASUREMENT" "LC_MESSAGES" "LC_MONETARY" "LC_NAME" "LC_NUMERIC" "LC_PAPER" "LC_TELEPHONE" "LC_TIME")
-PREFIXDATAFILESUFIX="files/cache/archlinux/$CACHECPBI/var/cache/pacman/pkg/"
+PREFIXDATAFILESUFIX="files/cache/archlinux/$ARCTEVAR/var/cache/pacman/pkg/"
 TXPRQUON="Termux PRoot with QEMU"
 TXPRQUON="Termux PRoot"
 UNAMER="$(uname -r)"
 
 _CALLSYSTEM_() {
 declare COUNTER=""
-if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX8664" ]] || [[ "$CPUABI" = "${CPUABIX8664//_/-}" ]] || [[ "$CPUABI" = i386 ]]
+if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX8664" ]]
 then
 _GETIMAGE_ ||:
 else
@@ -65,12 +82,12 @@ _DETECTSYSTEM7_
 elif [[ "$CPUABI" = "$CPUABI8" ]]
 then
 _DETECTSYSTEM64_
-elif [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = i386 ]]
+elif [[ "$CPUABI" = "$CPUABIX86" ]]
 then
 _I686_
-elif [[ "$CPUABI" = "$CPUABIX8664" ]] || [[ "$CPUABI" = "${CPUABIX8664//_/-}" ]]
+elif [[ "$CPUABI" = "$CPUABIX8664" ]]
 then
-_X86-64_
+_X86_64_
 else
 _PRINTMISMATCH_
 fi
@@ -212,13 +229,16 @@ fi
 fi
 }
 
-_PREPROOTDIR_() { # create local array of directories to be created by setupTermuxArch
-local DRARRLST=("etc" "home" "root/bin" "usr/bin" "$TMXRCHBNDS" "usr/local/bin" "var/backups/${INSTALLDIR##*/}/etc" "var/backups/${INSTALLDIR##*/}/root" "var/binds")
+TMXRCHBNDR="/usr/local/termuxarch/bin"
+TMXRCHBNDL="usr/local/termuxarch/lib"
+TMXRCHBNDS="usr/local/termuxarch/bin"
+_PREPROOTDIR_() {
+local DRARRLST=("etc" "home" "root/bin" "usr/bin" "$TMXRCHBNDL" "$TMXRCHBNDS" "usr/local/bin" "var/backups/${INSTALLDIR##*/}/etc" "var/backups/${INSTALLDIR##*/}/root" "var/binds")
 for ISDIR in ${DRARRLST[@]}
 do
 { [ -d "$ISDIR" ] || printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[0m\\n" "Creating directory " "'/$ISDIR'" "." && mkdir -p "$ISDIR" ; } || printf "\\e[0;32m%s\\e[1;32m%s\\e[0;32m%s\\e[0m\\n" "Directory " "/$ISDIR" " exists.  "
 done
-}
+} # create directories from local varables plus an array of directory names
 
 _PREPINSTALLDIR_() {
 cd "$INSTALLDIR" || exit 196
@@ -235,7 +255,7 @@ _FIXOWNER_
 }
 
 _PREPROOT_() {
-if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX8664" ]] || [[ "$CPUABI" = "${CPUABIX8664//_/-}" ]] || [[ "$CPUABI" = i386 ]]
+if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX8664" ]]
 then
 proot --link2symlink -0 bsdtar -p -xf "$IFILE" --strip-components 1 ||:
 else
@@ -250,13 +270,13 @@ sed -i "/\/mirror.archlinuxarm.org/ s/^# *//" "$INSTALLDIR/etc/pacman.d/mirrorli
 _ADDresolvconf_
 ALMLLOCN="$INSTALLDIR/etc/pacman.d/mirrorlist"
 cp "$ALMLLOCN" "$INSTALLDIR/var/backups/${INSTALLDIR##*/}/etc/mirrorlist.$SDATE.bkp" || _PSGI1ESTRING_ "cp _RUNFINISHSETUP_ necessaryfunctions.bash ${0##*/}"
-if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = i386 ]]
+if [[ "$CPUABI" = "$CPUABIX86" ]]
 then
 AL32MRLT="https://git.archlinux32.org/packages/plain/core/pacman-mirrorlist/mirrorlist"
 printf "\\e[0m\\n%s\\n" "Updating ${ALMLLOCN##*/} from $AL32MRLT."
 curl --retry 4 "$AL32MRLT" -o "$ALMLLOCN" || curl --retry 4 "$AL32MRLT" -o "$ALMLLOCN"
 _DOMIRROR_
-elif [[ "$CPUABI" = "$CPUABIX8664" ]] || [[ "$CPUABI" = "${CPUABIX8664//_/-}" ]]
+elif [[ "$CPUABI" = "$CPUABIX8664" ]]
 then
 AL64MRLT="https://www.archlinux.org/mirrorlist/all/"
 printf "\\e[0m\\n%s\\n" "Updating ${ALMLLOCN##*/} from $AL64MRLT."

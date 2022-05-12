@@ -63,8 +63,7 @@ done
 
 _PPLCACHEDIR_() {
 printf '\e[0;32mPopulating from cache files.  \e[1;32mBEGUN\n\e[0;32mThe \e[1;32m%s\e[0;32m command can be used to populate the cache.  The command \e[1;32m%s\e[0;32m will repopulate the installation package files from the cache directory and update the TermuxArch files to the newest published version.\n\e[1;32m' "'trim'" "'${0##*/} ref'"
-{ cd "$CACHEDIR" && printf '%s' "cd $CACHEDIR && " ; } || { cd "$PREFIXDATAFILES" && mkdir -p "$CACHEDIRSUFIX" && cd "$CACHEDIR" && printf '%s\n' "cd $PREFIXDATAFILES && mkdir -p $CACHEDIRSUFIX && cd $CACHEDIR && " ; } || exit 196
-[ -d "$CACHEDIRSUFIX" ] || { mkdir -p "$CACHEDIRSUFIX" && printf '%s' "mkdir -p $CACHEDIRSUFIX && " ; }
+{ [ -e "$CACHEDIR" ] && cd "$CACHEDIR" && printf '%s' "cd $CACHEDIR && " ; } || { cd "$PREFIXDATAFILES" && mkdir -p "$PREFIXDATAFILESUFIX" && cd "$CACHEDIR" && printf '%s\n' "cd $PREFIXDATAFILES && mkdir -p $PREFIXDATAFILESUFIX && cd $CACHEDIR && " ; } || exit 196
 cd "$INSTALLDIR" && printf '%s\n' "cd $INSTALLDIR" || exit 196
 find "$CACHEDIR" -type f -name "*tar.gz*" -exec ln -s {} \; 2>/dev/null
 [ -d "$INSTALLDIR"/var/cache/pacman/pkg ] || { mkdir -p "$INSTALLDIR"/var/cache/pacman/pkg && printf '%s' "mkdir -p $INSTALLDIR/var/cache/pacman/pkg && " ; }
@@ -85,7 +84,6 @@ _LOADIMAGE_() {
 _NAMESTARTARCH_
 _SPACEINFO_
 printf "\\n"
-_WAKELOCK_
 _PREPINSTALLDIR_
 _COPYIMAGE_
 _MD5CHECK_
@@ -95,7 +93,6 @@ _PRINTDONE_
 _PRINTCONFIGUP_
 _TOUCHUPSYS_
 printf "\\n"
-_WAKEUNLOCK_
 _PRINTFOOTER_
 set +Eeuo pipefail
 "$INSTALLDIR/$STARTBIN" || _PRINTPROOTERROR_
@@ -130,7 +127,6 @@ _PREPINSTALLDIR_
 _DOUSECACHEDIR_
 _SETLOCALE_
 printf "\\n"
-_WAKELOCK_
 printf "\\e[1;32m==> \\e[1;37m%s \\e[1;32m%s %s...\\n" "Running" "${0##*/}" "$ARGS"
 "$INSTALLDIR"/root/bin/setupbin.bash || _PRINTPROOTERROR_
 rm -f root/bin/finishsetup.bash
@@ -152,7 +148,6 @@ else
 printf "\\n\\e[0;32mIn order to refresh user directories, please use '\\e[1;32m%s re[fresh]\\e[0;32m'.  " "${0##*/}"
 fi
 printf "\\n"
-_WAKEUNLOCK_
 _PRINTFOOTER_
 set +Eeuo pipefail
 $STARTBIN || _PRINTPROOTERROR_
@@ -187,16 +182,16 @@ _SHFUNCWRAP_ () {
 if [[ "${LCR:-}" -eq 3 ]] || [[ "${LCR:-}" -eq 4 ]] || [[ "${LCR:-}" -eq 5 ]]
 then
 _PREPPACMANCONF_
-FNDTMPROOT=($(ls "$TMPDIR"/))
+FNDTMPROOT=($(find "$TMPDIR" -maxdepth 1 -type d -name "proot*"))
 if [ ${#FNDTMPROOT[@]} = 0 ]
 then
 _SHFUNC_ "$@"
 else
 if [ ${#FNDTMPROOT[@]} = 1 ]
 then
-printf "\\n\\e[0;32mFound %s open Termux PRoot session;  Not checking for errors." "${#FNDTMPROOT[@]}"
+printf "\\n\\e[0;34m%s" "Found ${#FNDTMPROOT[@]} open Termux PRoot QEMU session;  Not checking for errors."
 else
-printf "\\n\\e[0;32mFound %s open Termux PRoot sessions;  Not checking for errors." "${#FNDTMPROOT[@]}"
+printf "\\n\\e[0;34m%s" "Found ${#FNDTMPROOT[@]} open Termux PRoot QEMU sessions;  Not checking for errors."
 fi
 fi
 fi
@@ -218,7 +213,7 @@ fi
 
 _SPACEINFOGSIZE_() {
 _USERSPACE_
-if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX8664" ]] || [[ "$CPUABI" = i386 ]]
+if [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = "$CPUABIX8664" ]]
 then
 if [[ "$USRSPACE" = *G ]]
 then
@@ -229,9 +224,9 @@ USSPACE="${USRSPACE: : -1}"
 fi
 if [[ "$USSPACE" -lt "800" ]] && [[ "$CPUABI" = "$CPUABIX8664" ]]
 then
-SPACEMESSAGE="\\e[0;33mＴｅｒｍｕｘＡｒｃｈ: \\e[1;33mFREE SPACE NOTICE!  \\e[1;30mStart thinking about cleaning out some stuff please.  \\e[33mThere is only $USRSPACE of free user space is available on this device.  \\e[1;30mThe recommended minimum to install Arch Linux in Termux PRoot for x86-64 architecture is 800M of free user space.\\e[0m\\n"
+SPACEMESSAGE="\\e[0;33mＴｅｒｍｕｘＡｒｃｈ: \\e[1;33mFREE SPACE NOTICE!  \\e[1;30mStart thinking about cleaning out some stuff please.  \\e[33mThere is only $USRSPACE of free user space is available on this device.  \\e[1;30mThe recommended minimum to install Arch Linux in Termux PRoot for x86_64 architecture is 800M of free user space.\\e[0m\\n"
 fi
-if [[ "$USSPACE" -lt "600" ]] && { [[ "$CPUABI" = "$CPUABIX86" ]] || [[ "$CPUABI" = i386 ]] ; }
+if [[ "$USSPACE" -lt "600" ]] && [[ "$CPUABI" = "$CPUABIX86" ]]
 then
 SPACEMESSAGE="\\e[0;33mＴｅｒｍｕｘＡｒｃｈ: \\e[1;33mFREE SPACE NOTICE!  \\e[1;30mStart thinking about cleaning out some stuff please.  \\e[33mThere is only $USRSPACE of free user space is available on this device.  \\e[1;30mThe recommended minimum to install Arch Linux in Termux PRoot for $CPUABI architecture is 600M of free user space.\\e[0m\\n"
 fi
@@ -258,7 +253,7 @@ else
 SPACEMESSAGE=""
 fi
 else
-SPACEMESSAGE="\\e[0;33mＴｅｒｍｕｘＡｒｃｈ: \\e[1;33mFREE SPACE NOTICE!  \\e[1;30mStart thinking about cleaning out some stuff please.  \\e[33mThere is only $USRSPACE of free user space is available on this device.  \\e[1;30mThe recommended minimum to install Arch Linux in Termux PRoot is more than 1.5G for aarch64, more than 1.25G for armv7, 800M for x86-64 and 600M of free user space for x86 architecture.\\e[0m\\n"
+SPACEMESSAGE="\\e[0;33mＴｅｒｍｕｘＡｒｃｈ: \\e[1;33mFREE SPACE NOTICE!  \\e[1;30mStart thinking about cleaning out some stuff please.  \\e[33mThere is only $USRSPACE of free user space is available on this device.  \\e[1;30mThe recommended minimum to install Arch Linux in Termux PRoot is more than 1.5G for aarch64, more than 1.25G for armv7, 800M for x86_64 and 600M of free user space for x86 architecture.\\e[0m\\n"
 fi
 }
 
@@ -284,7 +279,7 @@ elif [[ "$CPUABI" = "$CPUABIX8664" ]]
 then
 if [[ "$USRSPACE" -lt "800000" ]]
 then
-SPACEMESSAGE="\\e[0;33mＴｅｒｍｕｘＡｒｃｈ: \\e[1;33mFREE SPACE NOTICE!  \\e[1;30mStart thinking about cleaning out some stuff please.  There is only \\e[33m$USRSPACE $units of free user space \\e[1;30mavailable on this device.  The recommended minimum to install Arch Linux in Termux PRoot for x86-64 architecture is 800M of free user space.\\e[0m\\n"
+SPACEMESSAGE="\\e[0;33mＴｅｒｍｕｘＡｒｃｈ: \\e[1;33mFREE SPACE NOTICE!  \\e[1;30mStart thinking about cleaning out some stuff please.  There is only \\e[33m$USRSPACE $units of free user space \\e[1;30mavailable on this device.  The recommended minimum to install Arch Linux in Termux PRoot for x86_64 architecture is 800M of free user space.\\e[0m\\n"
 else
 SPACEMESSAGE=""
 fi
